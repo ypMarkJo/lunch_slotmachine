@@ -2,8 +2,12 @@
 $scriptName = $_SERVER["SCRIPT_NAME"] ?? "/index.php";
 $basePath = rtrim(str_replace("\\", "/", dirname($scriptName)), "/");
 $basePath = $basePath === "/" ? "" : $basePath;
-$stylePath = $basePath . "/static/style.css";
-$appJsPath = $basePath . "/static/app.js";
+$styleFile = __DIR__ . "/static/style.css";
+$appJsFile = __DIR__ . "/static/app.js";
+$styleVer = file_exists($styleFile) ? filemtime($styleFile) : time();
+$appJsVer = file_exists($appJsFile) ? filemtime($appJsFile) : time();
+$stylePath = $basePath . "/static/style.css?v=" . $styleVer;
+$appJsPath = $basePath . "/static/app.js?v=" . $appJsVer;
 $apiPath = $basePath . "/api/restaurants.php";
 ?>
 <!doctype html>
