@@ -107,6 +107,69 @@ def index():
     )
 
 
+@app.post("/api/cheer")
+def api_cheer():
+    message = request.form.get("message", "").strip()
+    gifticon_file = request.files.get("gifticon")
+
+    if not message and not gifticon_file:
+        return jsonify({"success": False, "error": "응원 메시지나 기프티콘 이미지를 첨부해 주세요."}), 400
+
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+    if not bot_token or not chat_id:
+        return jsonify({"success": True, "notice": "텔레그램 환경변수 미설정으로 기록만 수행되었습니다."})
+
+    try:
+        import uuid
+        import urllib.request
+        import json
+
+        caption = f"🎁 [점심뭐묵칭코 개발자 응원]\n\n{message or '(메시지 없음)'}"
+
+        if gifticon_file:
+            boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+            body = []
+
+            # chat_id
+            body.append(f"--{boundary}".encode("utf-8"))
+            body.append(b'Content-Disposition: form-data; name="chat_id"\r\n')
+            body.append(chat_id.encode("utf-8"))
+
+            # caption
+            body.append(f"--{boundary}".encode("utf-8"))
+            body.append(b'Content-Disposition: form-data; name="caption"\r\n')
+            body.append(caption.encode("utf-8"))
+
+            # photo file
+            filename = gifticon_file.filename or "gifticon.jpg"
+            content_type = gifticon_file.mimetype or "image/jpeg"
+            file_bytes = gifticon_file.read()
+
+            body.append(f"--{boundary}".encode("utf-8"))
+            body.append(f'Content-Disposition: form-data; name="photo"; filename="{filename}"\r\nContent-Type: {content_type}\r\n'.encode("utf-8"))
+            body.append(file_bytes)
+
+            body.append(f"--{boundary}--\r\n".encode("utf-8"))
+
+            payload_bytes = b"\r\n".join(body)
+            url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+            headers = {"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        else:
+            url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+            payload_bytes = json.dumps({"chat_id": chat_id, "text": caption}).encode("utf-8")
+            headers = {"Content-Type": "application/json"}
+
+        req = urllib.request.Request(url, data=payload_bytes, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if resp.status == 200:
+                return jsonify({"success": True})
+        return jsonify({"success": False, "error": "전송 실패"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.get("/api/restaurants")
 def api_restaurants():
     radius_km = parse_radius_km(request.args.get("radius_km"), default=0.1)

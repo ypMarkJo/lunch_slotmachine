@@ -356,6 +356,93 @@ if (modalOverlay) {
   });
 }
 
+// 개발자 응원 모달 제어
+const openCheerBtn = document.getElementById("openCheerBtn");
+const cheerModalOverlay = document.getElementById("cheerModalOverlay");
+const closeCheerModalBtn = document.getElementById("closeCheerModalBtn");
+const cheerForm = document.getElementById("cheerForm");
+const cheerMsgInput = document.getElementById("cheerMsgInput");
+const gifticonInput = document.getElementById("gifticonInput");
+const fileNameDisplay = document.getElementById("fileNameDisplay");
+const sendCheerMsgBtn = document.getElementById("sendCheerMsgBtn");
+
+function openCheerModal() {
+  if (cheerModalOverlay) cheerModalOverlay.classList.remove("hidden");
+}
+
+function closeCheerModal() {
+  if (cheerModalOverlay) cheerModalOverlay.classList.add("hidden");
+}
+
+if (openCheerBtn) openCheerBtn.addEventListener("click", openCheerModal);
+if (closeCheerModalBtn) closeCheerModalBtn.addEventListener("click", closeCheerModal);
+if (cheerModalOverlay) {
+  cheerModalOverlay.addEventListener("click", (e) => {
+    if (e.target === cheerModalOverlay) closeCheerModal();
+  });
+}
+
+if (gifticonInput && fileNameDisplay) {
+  gifticonInput.addEventListener("change", () => {
+    if (gifticonInput.files && gifticonInput.files.length > 0) {
+      fileNameDisplay.textContent = `📎 ${gifticonInput.files[0].name}`;
+      fileNameDisplay.style.color = "#ffd166";
+    } else {
+      fileNameDisplay.textContent = "기프티콘 이미지 첨부하기 (선택)";
+      fileNameDisplay.style.color = "";
+    }
+  });
+}
+
+if (cheerForm) {
+  cheerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = cheerMsgInput.value.trim();
+    const file = gifticonInput?.files?.[0];
+
+    if (!msg && !file) {
+      alert("응원 메시지나 기프티콘 이미지를 첨부해 주세요! 💌");
+      return;
+    }
+
+    sendCheerMsgBtn.disabled = true;
+    sendCheerMsgBtn.textContent = "전송 중...";
+
+    try {
+      const formData = new FormData();
+      formData.append("message", msg);
+      if (file) {
+        formData.append("gifticon", file);
+      }
+
+      const cheerUrl = window.CHEER_API_URL || "./api/cheer.php";
+      const res = await fetch(cheerUrl, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("개발자에게 따뜻한 마음(메시지/기프티콘)이 전송되었습니다! 감사의 마음을 담아 맛있는 점심 되시길 바랍니다. ❤️");
+        cheerMsgInput.value = "";
+        if (gifticonInput) gifticonInput.value = "";
+        if (fileNameDisplay) {
+          fileNameDisplay.textContent = "기프티콘 이미지 첨부하기 (선택)";
+          fileNameDisplay.style.color = "";
+        }
+        closeCheerModal();
+      } else {
+        alert("전송 중 문제가 발생했습니다: " + (data.error || "다시 시도해 주세요."));
+      }
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
+    } finally {
+      sendCheerMsgBtn.disabled = false;
+      sendCheerMsgBtn.textContent = "❤️ 마음 전하기";
+    }
+  });
+}
+
 updateRadiusDisplay();
 updateLocationUi();
 requestCurrentLocation(true);

@@ -399,9 +399,26 @@ body {
 
 .app-footer {
   margin-top: 32px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: center;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cheer-row {
+  margin-top: 4px;
 }
 
 .visitor-badge {
@@ -421,6 +438,109 @@ body {
   font-size: 0.95rem;
 }
 
-.hidden {
+.cheer-trigger-btn {
+  background: linear-gradient(180deg, #ff8c42, #e05d06);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(224, 93, 6, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cheer-trigger-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(224, 93, 6, 0.6);
+}
+
+/* Cheer Modal */
+.cheer-modal {
+  max-width: 400px;
+}
+
+.cheer-modal-title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  color: #ffd166;
+}
+
+.cheer-modal-sub {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.cheer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cheer-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #111936;
+  border: 1px solid #2d3b6e;
+  border-radius: 12px;
+  color: #fff;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: none;
+  outline: none;
+}
+
+.cheer-textarea:focus {
+  border-color: #ffd166;
+}
+
+.file-upload-box {
+  position: relative;
+  width: 100%;
+}
+
+.file-input {
   display: none;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #111936;
+  border: 1px dashed #3b4e85;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.file-upload-label:hover {
+  border-color: #ffd166;
+  color: #fff;
+}
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.send-cheer-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.hidden {
+  display: none !important;
 }

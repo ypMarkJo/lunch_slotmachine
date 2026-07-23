@@ -9,6 +9,7 @@ $appJsVer = file_exists($appJsFile) ? filemtime($appJsFile) : time();
 $stylePath = $basePath . "/static/style.css?v=" . $styleVer;
 $appJsPath = $basePath . "/static/app.js?v=" . $appJsVer;
 $apiPath = $basePath . "/api/restaurants.php";
+$cheerApiPath = $basePath . "/api/cheer.php";
 
 // 누적 방문자 수 파일 카운터
 $counterFile = __DIR__ . "/counter.txt";
@@ -100,14 +101,43 @@ $formattedVisits = number_format($visitCount);
       </div>
 
       <footer class="app-footer">
-        <div class="visitor-badge">
-          🎰 누군가의 점심을 <span class="visitor-count"><?= $formattedVisits ?></span>번째 추천 중!
+        <div class="footer-content">
+          <div class="footer-row">
+            <span class="visitor-badge">🎰 누군가의 점심을 <span class="visitor-count"><?= $formattedVisits ?></span>번째 추천 중!</span>
+          </div>
+          <div class="footer-row cheer-row">
+            <button id="openCheerBtn" class="cheer-trigger-btn" type="button">☕ 개발자 응원하기</button>
+          </div>
         </div>
       </footer>
     </main>
 
+    <!-- 개발자 응원 모달 -->
+    <div id="cheerModalOverlay" class="modal-overlay hidden">
+      <section class="result-modal cheer-modal">
+        <button id="closeCheerModalBtn" class="close-modal-btn" type="button" aria-label="닫기">✕</button>
+        <h2 class="cheer-modal-title">🎁 개발자 응원하기</h2>
+        <p class="cheer-modal-sub">따뜻한 한마디나 커피/기프티콘을 자유롭게 전해주세요!</p>
+
+        <form id="cheerForm" class="cheer-form">
+          <textarea id="cheerMsgInput" class="cheer-textarea" placeholder="개발자에게 전하고 싶은 따뜻한 한마디를 적어주세요! 💌" rows="4"></textarea>
+
+          <div class="file-upload-box">
+            <label for="gifticonInput" class="file-upload-label">
+              <span class="file-icon">🖼️</span>
+              <span id="fileNameDisplay" class="file-name">기프티콘 이미지 첨부하기 (선택)</span>
+            </label>
+            <input id="gifticonInput" type="file" accept="image/*" class="file-input" />
+          </div>
+
+          <button id="sendCheerMsgBtn" class="spin-btn send-cheer-btn" type="submit">❤️ 마음 전하기</button>
+        </form>
+      </section>
+    </div>
+
     <script>
       window.API_URL = <?= json_encode($apiPath, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+      window.CHEER_API_URL = <?= json_encode($cheerApiPath, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
       window.DEFAULT_LOCATION_LABEL = "LS용산타워";
     </script>
     <script src="<?= htmlspecialchars($appJsPath, ENT_QUOTES, 'UTF-8') ?>"></script>
