@@ -51,10 +51,11 @@ body {
 
 .app-title {
   margin: 4px 0 0;
-  font-family: 'Do Hyeon', 'Noto Sans KR', sans-serif;
-  font-size: 2.1rem;
+  font-family: 'Do Hyeon', 'Black Han Sans', 'Impact', sans-serif;
+  font-size: 2.2rem;
   font-weight: 400;
   letter-spacing: 0.5px;
+  color: #ffd700;
   background: linear-gradient(180deg, #ffffff 40%, #ffe066 85%, #ffa500 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
