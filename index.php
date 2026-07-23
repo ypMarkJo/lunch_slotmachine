@@ -21,7 +21,7 @@ $apiPath = $basePath . "/api/restaurants.php";
     <main class="container">
       <header class="app-header">
         <div class="brand-badge">🎰 LUNCH SLOT</div>
-        <h1 class="app-title">오늘 점심 뭐 먹지?</h1>
+        <h1 class="app-title">점심 뭐묵칭코</h1>
       </header>
       <p class="guide-tip">💡 <strong>사용 방법:</strong> [거리 슬라이더 조절] → [주변 식당 불러오기] → [추천 시작(빠칭코)]</p>
       <section class="controls">
