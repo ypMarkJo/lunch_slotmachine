@@ -20,9 +20,11 @@ let restaurants = [];
 let loading = false;
 let userCoords = null;
 let radiusKm = Number.parseInt(radiusSelect?.value || "2", 10) || 2;
+let recommendationPool = [];
 
 function applyRestaurants(data) {
   restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
+  recommendationPool = [];
   if (sourceText) {
     sourceText.textContent = `데이터 소스: ${data.source || "알 수 없음"}`;
   }
@@ -102,6 +104,21 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
+function getNextWinnerIndex() {
+  if (restaurants.length === 0) return -1;
+
+  if (recommendationPool.length === 0) {
+    recommendationPool = Array.from({ length: restaurants.length }, (_, index) => index);
+    for (let i = recommendationPool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [recommendationPool[i], recommendationPool[j]] = [recommendationPool[j], recommendationPool[i]];
+    }
+  }
+
+  const nextIndex = recommendationPool.pop();
+  return nextIndex === undefined ? -1 : nextIndex;
+}
+
 function getMapUrl(restaurant) {
   if (restaurant.place_url) {
     return restaurant.place_url;
@@ -118,7 +135,8 @@ function spin() {
   spinBtn.disabled = true;
   resultCard.classList.add("hidden");
 
-  const winnerIndex = Math.floor(Math.random() * restaurants.length);
+  const winnerIndex = getNextWinnerIndex();
+  if (winnerIndex < 0) return;
   const winner = restaurants[winnerIndex];
 
   const baseLoop = Math.floor(REPEAT_COUNT * 0.8);

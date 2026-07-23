@@ -52,6 +52,11 @@ def parse_coordinate(raw: Optional[str], minimum: float, maximum: float) -> Opti
     return value
 
 
+def determine_max_pages(radius_km: int) -> int:
+    # 기존 대비 1.5배 조회량으로 반경이 넓을 때 후보군을 더 확보합니다. (Kakao page 최대 45)
+    return max(6, min(45, radius_km * 6))
+
+
 def build_restaurant_payload(
     radius_km: int, latitude: Optional[float] = None, longitude: Optional[float] = None
 ) -> dict:
@@ -68,7 +73,7 @@ def build_restaurant_payload(
             restaurants = fetch_nearby_restaurants(
                 api_key=api_key,
                 radius=radius_km * 1000,
-                max_pages=3,
+                max_pages=determine_max_pages(radius_km),
                 latitude=latitude,
                 longitude=longitude,
             )

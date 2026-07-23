@@ -111,6 +111,50 @@ function parse_coordinate(mixed $raw, float $min, float $max): ?float
     return $value;
 }
 
+function determine_max_pages(int $radiusKm): int
+{
+    // 기존 대비 1.5배 조회량으로 반경이 넓을 때 후보군을 더 확보합니다. (Kakao page 최대 45)
+    return max(6, min(45, $radiusKm * 6));
+}
+
+function offset_coordinate(float $latitude, float $longitude, float $distanceMeter, float $bearingDegree): array
+{
+    $bearing = deg2rad($bearingDegree);
+    $latOffset = ($distanceMeter * cos($bearing)) / 111320.0;
+    $lngBase = 111320.0 * max(0.1, cos(deg2rad($latitude)));
+    $lngOffset = ($distanceMeter * sin($bearing)) / $lngBase;
+    return [$latitude + $latOffset, $longitude + $lngOffset];
+}
+
+function build_search_points(float $centerX, float $centerY, int $radius): array
+{
+    $points = [[$centerX, $centerY]];
+    if ($radius < 2500) {
+        return $points;
+    }
+
+    $ringDistance = $radius * 0.6;
+    foreach ([0.0, 90.0, 180.0, 270.0] as $bearing) {
+        [$lat, $lng] = offset_coordinate($centerY, $centerX, $ringDistance, $bearing);
+        $points[] = [$lng, $lat];
+    }
+    return $points;
+}
+
+function distance_meters(float $lat1, float $lng1, float $lat2, float $lng2): int
+{
+    $earthRadius = 6371000.0;
+    $lat1Rad = deg2rad($lat1);
+    $lat2Rad = deg2rad($lat2);
+    $deltaLat = deg2rad($lat2 - $lat1);
+    $deltaLng = deg2rad($lng2 - $lng1);
+
+    $a = sin($deltaLat / 2) ** 2
+        + cos($lat1Rad) * cos($lat2Rad) * sin($deltaLng / 2) ** 2;
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    return (int)round($earthRadius * $c);
+}
+
 function fetch_nearby_restaurants(
     string $apiKey,
     int $radius = 2000,
@@ -119,65 +163,83 @@ function fetch_nearby_restaurants(
     ?float $latitude = null
 ): array {
     if ($longitude !== null && $latitude !== null) {
-        $x = $longitude;
-        $y = $latitude;
+        $centerX = $longitude;
+        $centerY = $latitude;
     } else {
-        [$x, $y] = find_center($apiKey);
+        [$centerX, $centerY] = find_center($apiKey);
     }
 
+    $points = build_search_points($centerX, $centerY, $radius);
+    $pagesPerPoint = max(1, min(10, (int)ceil($maxPages / count($points))));
     $items = [];
     $seen = [];
 
-    for ($page = 1; $page <= $maxPages; $page++) {
-        $payload = kakao_get(
-            "/v2/local/search/category.json",
-            [
-                "category_group_code" => "FD6",
-                "x" => $x,
-                "y" => $y,
-                "radius" => $radius,
-                "sort" => "distance",
-                "size" => 15,
-                "page" => $page,
-            ],
-            $apiKey
-        );
+    foreach ($points as $point) {
+        [$pointX, $pointY] = $point;
+        for ($page = 1; $page <= $pagesPerPoint; $page++) {
+            $payload = kakao_get(
+                "/v2/local/search/category.json",
+                [
+                    "category_group_code" => "FD6",
+                    "x" => $pointX,
+                    "y" => $pointY,
+                    "radius" => $radius,
+                    "sort" => "accuracy",
+                    "size" => 15,
+                    "page" => $page,
+                ],
+                $apiKey
+            );
 
-        $documents = $payload["documents"] ?? [];
-        if (!is_array($documents)) {
-            continue;
-        }
-
-        foreach ($documents as $place) {
-            $placeId = (string)($place["id"] ?? "");
-            if ($placeId === "" || isset($seen[$placeId])) {
+            $documents = $payload["documents"] ?? [];
+            if (!is_array($documents)) {
                 continue;
             }
-            $seen[$placeId] = true;
 
-            $categoryName = (string)($place["category_name"] ?? "");
-            $leaf = "음식점";
-            if ($categoryName !== "") {
-                $parts = explode(">", $categoryName);
-                $leaf = trim((string)$parts[count($parts) - 1]);
+            foreach ($documents as $place) {
+                $placeId = (string)($place["id"] ?? "");
+                if ($placeId === "" || isset($seen[$placeId])) {
+                    continue;
+                }
+
+                $placeXRaw = (string)($place["x"] ?? "");
+                $placeYRaw = (string)($place["y"] ?? "");
+                if (!is_numeric($placeXRaw) || !is_numeric($placeYRaw)) {
+                    continue;
+                }
+                $placeX = (float)$placeXRaw;
+                $placeY = (float)$placeYRaw;
+                $distanceFromCenter = distance_meters($centerY, $centerX, $placeY, $placeX);
+                if ($distanceFromCenter > $radius) {
+                    continue;
+                }
+
+                $seen[$placeId] = true;
+
+                $categoryName = (string)($place["category_name"] ?? "");
+                $leaf = "음식점";
+                if ($categoryName !== "") {
+                    $parts = explode(">", $categoryName);
+                    $leaf = trim((string)$parts[count($parts) - 1]);
+                }
+
+                $items[] = [
+                    "id" => $placeId,
+                    "name" => (string)($place["place_name"] ?? "이름없음"),
+                    "category" => $leaf,
+                    "area" => (string)($place["address_name"] ?? ($place["road_address_name"] ?? "주소정보없음")),
+                    "distance_m" => $distanceFromCenter,
+                    "phone" => (string)($place["phone"] ?? ""),
+                    "place_url" => (string)($place["place_url"] ?? ""),
+                    "rating" => null,
+                    "price" => "정보없음",
+                ];
             }
 
-            $items[] = [
-                "id" => $placeId,
-                "name" => (string)($place["place_name"] ?? "이름없음"),
-                "category" => $leaf,
-                "area" => (string)($place["address_name"] ?? ($place["road_address_name"] ?? "주소정보없음")),
-                "distance_m" => (int)($place["distance"] ?? 0),
-                "phone" => (string)($place["phone"] ?? ""),
-                "place_url" => (string)($place["place_url"] ?? ""),
-                "rating" => null,
-                "price" => "정보없음",
-            ];
-        }
-
-        $meta = $payload["meta"] ?? [];
-        if (($meta["is_end"] ?? false) === true) {
-            break;
+            $meta = $payload["meta"] ?? [];
+            if (($meta["is_end"] ?? false) === true) {
+                break;
+            }
         }
     }
 
@@ -189,6 +251,7 @@ $sampleRestaurants = require __DIR__ . "/../data/sample_restaurants.php";
 $apiKey = getenv("KAKAO_REST_API_KEY");
 $radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 2);
 $radiusMeter = $radiusKm * 1000;
+$maxPages = determine_max_pages($radiusKm);
 $latitude = parse_coordinate($_GET["lat"] ?? null, -90.0, 90.0);
 $longitude = parse_coordinate($_GET["lng"] ?? null, -180.0, 180.0);
 $usingCurrentLocation = $latitude !== null && $longitude !== null;
@@ -203,7 +266,7 @@ $response = [
 
 if (is_string($apiKey) && trim($apiKey) !== "") {
     try {
-        $restaurants = fetch_nearby_restaurants($apiKey, $radiusMeter, 3, $longitude, $latitude);
+        $restaurants = fetch_nearby_restaurants($apiKey, $radiusMeter, $maxPages, $longitude, $latitude);
         if (count($restaurants) > 0) {
             $response = [
                 "source" => "카카오 로컬 API",

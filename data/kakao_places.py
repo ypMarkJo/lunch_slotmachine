@@ -57,7 +57,7 @@ def fetch_nearby_restaurants(
                 "x": center_x,
                 "y": center_y,
                 "radius": radius,
-                "sort": "distance",
+                "sort": "accuracy",
                 "size": 15,
                 "page": page,
             },
