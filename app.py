@@ -32,12 +32,12 @@ def load_dotenv(path: str = ".env") -> None:
 load_dotenv()
 
 
-def parse_radius_km(raw: Optional[str], default: int = 2) -> int:
+def parse_radius_km(raw: Optional[str], default: float = 2.0) -> float:
     try:
-        value = int(raw) if raw is not None else default
+        value = float(raw) if raw is not None else default
     except ValueError:
         value = default
-    return max(1, min(5, value))
+    return max(0.1, min(5.0, round(value, 1)))
 
 
 def parse_coordinate(raw: Optional[str], minimum: float, maximum: float) -> Optional[float]:
@@ -52,13 +52,13 @@ def parse_coordinate(raw: Optional[str], minimum: float, maximum: float) -> Opti
     return value
 
 
-def determine_max_pages(radius_km: int) -> int:
-    # 기존 대비 1.5배 조회량으로 반경이 넓을 때 후보군을 더 확보합니다. (Kakao page 최대 45)
-    return max(6, min(45, radius_km * 6))
+def determine_max_pages(radius_km: float) -> int:
+    # 카카오 API 최대 지원 페이지 수(45페이지 = 675개 후보)까지 요청하여 가능한 한 최대 100개 이상 식당을 수집합니다.
+    return 45
 
 
 def build_restaurant_payload(
-    radius_km: int, latitude: Optional[float] = None, longitude: Optional[float] = None
+    radius_km: float, latitude: Optional[float] = None, longitude: Optional[float] = None
 ) -> dict:
     api_key = os.getenv("KAKAO_REST_API_KEY")
     using_current_location = latitude is not None and longitude is not None
@@ -72,7 +72,7 @@ def build_restaurant_payload(
         try:
             restaurants = fetch_nearby_restaurants(
                 api_key=api_key,
-                radius=radius_km * 1000,
+                radius=int(round(radius_km * 1000)),
                 max_pages=determine_max_pages(radius_km),
                 latitude=latitude,
                 longitude=longitude,

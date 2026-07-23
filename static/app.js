@@ -7,7 +7,8 @@ const mapLink = document.getElementById("mapLink");
 const sourceText = document.getElementById("sourceText");
 const noticeText = document.getElementById("noticeText");
 const locationBtn = document.getElementById("locationBtn");
-const radiusSelect = document.getElementById("radiusSelect");
+const radiusRange = document.getElementById("radiusRange");
+const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
 const locationStatus = document.getElementById("locationStatus");
 
@@ -19,8 +20,26 @@ let spinning = false;
 let restaurants = [];
 let loading = false;
 let userCoords = null;
-let radiusKm = Number.parseInt(radiusSelect?.value || "2", 10) || 2;
-let recommendationPool = [];
+let radiusKm = parseRadiusValue(radiusRange?.value || "2.0");
+
+function parseRadiusValue(value) {
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return 2.0;
+  return Math.min(5.0, Math.max(0.1, Math.round(parsed * 10) / 10));
+}
+
+function formatRadiusText(km) {
+  if (km < 1) {
+    return `${Math.round(km * 1000)}m`;
+  }
+  return `${km.toFixed(1)}km`;
+}
+
+function updateRadiusDisplay() {
+  if (radiusValue) {
+    radiusValue.textContent = formatRadiusText(radiusKm);
+  }
+}
 
 function applyRestaurants(data) {
   restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
@@ -42,20 +61,16 @@ function setNotice(message) {
   }
 }
 
-function clampRadius(value) {
-  if (!Number.isFinite(value)) return 2;
-  return Math.min(5, Math.max(1, Math.round(value)));
-}
-
 function updateLocationUi() {
   if (locationBtn) {
     locationBtn.textContent = userCoords ? "기본 위치로 되돌리기" : "현재 위치 사용";
   }
   if (locationStatus) {
+    const formattedRadius = formatRadiusText(radiusKm);
     if (userCoords) {
-      locationStatus.textContent = `현재 위치 사용 중 (반경 ${radiusKm}km)`;
+      locationStatus.textContent = `현재 위치 사용 중 (거리 ${formattedRadius})`;
     } else {
-      locationStatus.textContent = `기본 위치 사용: ${defaultLocationLabel} (반경 ${radiusKm}km)`;
+      locationStatus.textContent = `기본 위치 사용: ${defaultLocationLabel} (거리 ${formattedRadius})`;
     }
   }
 }
@@ -68,8 +83,8 @@ function setLoading(state) {
   if (locationBtn) {
     locationBtn.disabled = state;
   }
-  if (radiusSelect) {
-    radiusSelect.disabled = state;
+  if (radiusRange) {
+    radiusRange.disabled = state;
   }
 }
 
@@ -267,13 +282,17 @@ if (reloadBtn) {
     }
   });
 }
-if (radiusSelect) {
-  radiusSelect.addEventListener("change", () => {
-    radiusKm = clampRadius(Number.parseInt(radiusSelect.value, 10));
+if (radiusRange) {
+  radiusRange.addEventListener("input", () => {
+    radiusKm = parseRadiusValue(radiusRange.value);
+    updateRadiusDisplay();
     updateLocationUi();
-    if (!loading) {
-      loadRestaurants();
-    }
+  });
+  radiusRange.addEventListener("change", () => {
+    radiusKm = parseRadiusValue(radiusRange.value);
+    updateRadiusDisplay();
+    updateLocationUi();
+    setNotice("거리 설정이 변경되었습니다. '주변 식당 불러오기' 버튼을 눌러 목록을 갱신하세요.");
   });
 }
 if (locationBtn) {
@@ -292,5 +311,6 @@ if (locationBtn) {
   });
 }
 
+updateRadiusDisplay();
 updateLocationUi();
 loadRestaurants();

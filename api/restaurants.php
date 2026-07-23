@@ -80,17 +80,15 @@ function find_center(string $apiKey): array
     return [(float)($center["x"] ?? 0), (float)($center["y"] ?? 0)];
 }
 
-function parse_radius_km(mixed $raw, int $default = 2): int
+function parse_radius_km(mixed $raw, float $default = 2.0): float
 {
-    if (is_string($raw) && preg_match('/^\d+$/', $raw) === 1) {
-        $value = (int)$raw;
-    } elseif (is_int($raw)) {
-        $value = $raw;
+    if (is_numeric($raw)) {
+        $value = (float)$raw;
     } else {
         $value = $default;
     }
 
-    return max(1, min(5, $value));
+    return max(0.1, min(5.0, round($value, 1)));
 }
 
 function parse_coordinate(mixed $raw, float $min, float $max): ?float
@@ -111,10 +109,10 @@ function parse_coordinate(mixed $raw, float $min, float $max): ?float
     return $value;
 }
 
-function determine_max_pages(int $radiusKm): int
+function determine_max_pages(float $radiusKm): int
 {
-    // 기존 대비 1.5배 조회량으로 반경이 넓을 때 후보군을 더 확보합니다. (Kakao page 최대 45)
-    return max(6, min(45, $radiusKm * 6));
+    // 카카오 API 최대 지원 페이지 수(45페이지)까지 요청하여 목표 100개 이상 식당을 수집합니다.
+    return 45;
 }
 
 function offset_coordinate(float $latitude, float $longitude, float $distanceMeter, float $bearingDegree): array
@@ -129,14 +127,12 @@ function offset_coordinate(float $latitude, float $longitude, float $distanceMet
 function build_search_points(float $centerX, float $centerY, int $radius): array
 {
     $points = [[$centerX, $centerY]];
-    if ($radius < 2500) {
-        return $points;
-    }
-
-    $ringDistance = $radius * 0.6;
-    foreach ([0.0, 90.0, 180.0, 270.0] as $bearing) {
-        [$lat, $lng] = offset_coordinate($centerY, $centerX, $ringDistance, $bearing);
-        $points[] = [$lng, $lat];
+    if ($radius >= 200) {
+        $ringDistance = $radius * 0.55;
+        foreach ([0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0] as $bearing) {
+            [$lat, $lng] = offset_coordinate($centerY, $centerX, $ringDistance, $bearing);
+            $points[] = [$lng, $lat];
+        }
     }
     return $points;
 }
@@ -158,9 +154,10 @@ function distance_meters(float $lat1, float $lng1, float $lat2, float $lng2): in
 function fetch_nearby_restaurants(
     string $apiKey,
     int $radius = 2000,
-    int $maxPages = 3,
+    int $maxPages = 45,
     ?float $longitude = null,
-    ?float $latitude = null
+    ?float $latitude = null,
+    int $targetCount = 200
 ): array {
     if ($longitude !== null && $latitude !== null) {
         $centerX = $longitude;
@@ -170,13 +167,12 @@ function fetch_nearby_restaurants(
     }
 
     $points = build_search_points($centerX, $centerY, $radius);
-    $pagesPerPoint = max(1, min(10, (int)ceil($maxPages / count($points))));
     $items = [];
     $seen = [];
 
     foreach ($points as $point) {
         [$pointX, $pointY] = $point;
-        for ($page = 1; $page <= $pagesPerPoint; $page++) {
+        for ($page = 1; $page <= 45; $page++) {
             $payload = kakao_get(
                 "/v2/local/search/category.json",
                 [
@@ -192,8 +188,8 @@ function fetch_nearby_restaurants(
             );
 
             $documents = $payload["documents"] ?? [];
-            if (!is_array($documents)) {
-                continue;
+            if (!is_array($documents) || count($documents) === 0) {
+                break;
             }
 
             foreach ($documents as $place) {
@@ -240,6 +236,12 @@ function fetch_nearby_restaurants(
             if (($meta["is_end"] ?? false) === true) {
                 break;
             }
+            if (count($items) >= $targetCount) {
+                break;
+            }
+        }
+        if (count($items) >= $targetCount) {
+            break;
         }
     }
 
@@ -249,8 +251,8 @@ function fetch_nearby_restaurants(
 load_env(__DIR__ . "/../.env");
 $sampleRestaurants = require __DIR__ . "/../data/sample_restaurants.php";
 $apiKey = getenv("KAKAO_REST_API_KEY");
-$radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 2);
-$radiusMeter = $radiusKm * 1000;
+$radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 2.0);
+$radiusMeter = (int)round($radiusKm * 1000);
 $maxPages = determine_max_pages($radiusKm);
 $latitude = parse_coordinate($_GET["lat"] ?? null, -90.0, 90.0);
 $longitude = parse_coordinate($_GET["lng"] ?? null, -180.0, 180.0);
