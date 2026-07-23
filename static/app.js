@@ -175,9 +175,13 @@ function spin() {
 
     resultName.textContent = `오늘의 추천: ${winner.name}`;
 
-    const metaParts = [winner.category, winner.area];
+    const metaParts = [winner.category];
     if (winner.distance_m !== undefined && winner.distance_m !== null) {
-      metaParts.push(`${winner.distance_m}m`);
+      const walkMins = Math.max(1, Math.round(winner.distance_m / 67));
+      metaParts.push(`🚶‍♂️ 도보 약 ${walkMins}분 (${winner.distance_m}m)`);
+    }
+    if (winner.area) {
+      metaParts.push(winner.area);
     }
     if (winner.price && winner.price !== "정보없음") {
       metaParts.push(winner.price);
