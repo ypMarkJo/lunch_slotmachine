@@ -147,6 +147,40 @@ function showModal() {
   }
 }
 
+let currentWinner = null;
+
+function updateModalContent(winner) {
+  if (!winner) return;
+  resultName.textContent = `오늘의 추천: ${winner.name}`;
+
+  const metaParts = [winner.category];
+  if (winner.distance_m !== undefined && winner.distance_m !== null) {
+    const paceValue = Number.parseInt(paceSelect?.value || "1200", 10) || 1200;
+    const totalSeconds = (winner.distance_m / 1000) * paceValue;
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = Math.round(totalSeconds % 60);
+    let timeText = "";
+    if (mins > 0) {
+      timeText += `${mins}분 `;
+    }
+    timeText += `${secs}초`;
+    metaParts.push(`🏃‍♂️ 약 ${timeText} (${winner.distance_m}m)`);
+  }
+  if (winner.area) {
+    metaParts.push(winner.area);
+  }
+  if (winner.price && winner.price !== "정보없음") {
+    metaParts.push(winner.price);
+  }
+  if (winner.rating !== null && winner.rating !== undefined) {
+    metaParts.push(`⭐ ${winner.rating}`);
+  }
+  resultMeta.textContent = metaParts.join(" · ");
+  if (mapLink) {
+    mapLink.href = getMapUrl(winner);
+  }
+}
+
 function spin() {
   if (spinning || restaurants.length === 0) return;
 
@@ -157,6 +191,7 @@ function spin() {
   const winnerIndex = getNextWinnerIndex();
   if (winnerIndex < 0) return;
   const winner = restaurants[winnerIndex];
+  currentWinner = winner;
 
   const baseLoop = Math.floor(REPEAT_COUNT * 0.8);
   const targetPosition = (baseLoop * restaurants.length + winnerIndex) * ITEM_HEIGHT;
@@ -174,35 +209,7 @@ function spin() {
       return;
     }
 
-    resultName.textContent = `오늘의 추천: ${winner.name}`;
-
-    const metaParts = [winner.category];
-    if (winner.distance_m !== undefined && winner.distance_m !== null) {
-      const paceValue = Number.parseInt(paceSelect?.value || "1200", 10) || 1200;
-      const totalSeconds = (winner.distance_m / 1000) * paceValue;
-      const mins = Math.floor(totalSeconds / 60);
-      const secs = Math.round(totalSeconds % 60);
-      let timeText = "";
-      if (mins > 0) {
-        timeText += `${mins}분 `;
-      }
-      timeText += `${secs}초`;
-      metaParts.push(`🏃‍♂️ 약 ${timeText} (${winner.distance_m}m)`);
-    }
-    if (winner.area) {
-      metaParts.push(winner.area);
-    }
-    if (winner.price && winner.price !== "정보없음") {
-      metaParts.push(winner.price);
-    }
-    if (winner.rating !== null && winner.rating !== undefined) {
-      metaParts.push(`⭐ ${winner.rating}`);
-    }
-    resultMeta.textContent = metaParts.join(" · ");
-    if (mapLink) {
-      mapLink.href = getMapUrl(winner);
-    }
-
+    updateModalContent(currentWinner);
     showModal();
 
     spinning = false;
@@ -324,6 +331,13 @@ if (categorySelect) {
     recommendationPool = [];
     buildReel();
     hideModal();
+  });
+}
+if (paceSelect) {
+  paceSelect.addEventListener("change", () => {
+    if (currentWinner) {
+      updateModalContent(currentWinner);
+    }
   });
 }
 if (closeModalBtn) {

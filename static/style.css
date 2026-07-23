@@ -183,6 +183,11 @@ body {
   border: 1px solid #2d3b6e;
 }
 
+.modal-pace {
+  margin: 12px 0 14px;
+  background: rgba(11, 16, 32, 0.6);
+}
+
 .pace-label {
   color: var(--muted);
   font-size: 0.95rem;
