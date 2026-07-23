@@ -39,7 +39,18 @@ function formatRadiusText(km) {
 
 function updateRadiusDisplay() {
   if (radiusValue) {
-    radiusValue.textContent = formatRadiusText(radiusKm);
+    const formatted = formatRadiusText(radiusKm);
+    const meters = Math.round(radiusKm * 1000);
+    const paceValue = Number.parseInt(paceSelect?.value || "1200", 10) || 1200;
+    const totalSeconds = (meters / 1000) * paceValue;
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = Math.round(totalSeconds % 60);
+    let timeText = "";
+    if (mins > 0) {
+      timeText += `${mins}분 `;
+    }
+    timeText += `${secs}초`;
+    radiusValue.textContent = `${formatted} (약 ${timeText})`;
   }
 }
 
@@ -335,6 +346,7 @@ if (categorySelect) {
 }
 if (paceSelect) {
   paceSelect.addEventListener("change", () => {
+    updateRadiusDisplay();
     if (currentWinner) {
       updateModalContent(currentWinner);
     }
