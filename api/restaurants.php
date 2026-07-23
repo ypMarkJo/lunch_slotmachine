@@ -167,86 +167,93 @@ function fetch_nearby_restaurants(
     }
 
     $points = build_search_points($centerX, $centerY, $radius);
+    // 수집 지점 순서를 섞어서 위치 편중 방지
+    shuffle($points);
+
     $items = [];
     $seen = [];
+    // 정확도순(accuracy)과 거리순(distance)을 번갈아 수집해 유명 맛집과 숨은 맛집 조합
+    $sortOptions = ["accuracy", "distance"];
 
-    foreach ($points as $point) {
-        [$pointX, $pointY] = $point;
-        for ($page = 1; $page <= 45; $page++) {
-            $payload = kakao_get(
-                "/v2/local/search/category.json",
-                [
-                    "category_group_code" => "FD6",
-                    "x" => $pointX,
-                    "y" => $pointY,
-                    "radius" => $radius,
-                    "sort" => "accuracy",
-                    "size" => 15,
-                    "page" => $page,
-                ],
-                $apiKey
-            );
+    foreach ($sortOptions as $sortMode) {
+        foreach ($points as $point) {
+            [$pointX, $pointY] = $point;
+            // 지점당 최대 5페이지씩 균등 긁기
+            for ($page = 1; $page <= 5; $page++) {
+                $payload = kakao_get(
+                    "/v2/local/search/category.json",
+                    [
+                        "category_group_code" => "FD6",
+                        "x" => $pointX,
+                        "y" => $pointY,
+                        "radius" => $radius,
+                        "sort" => $sortMode,
+                        "size" => 15,
+                        "page" => $page,
+                    ],
+                    $apiKey
+                );
 
-            $documents = $payload["documents"] ?? [];
-            if (!is_array($documents) || count($documents) === 0) {
-                break;
-            }
-
-            foreach ($documents as $place) {
-                $placeId = (string)($place["id"] ?? "");
-                if ($placeId === "" || isset($seen[$placeId])) {
-                    continue;
+                $documents = $payload["documents"] ?? [];
+                if (!is_array($documents) || count($documents) === 0) {
+                    break;
                 }
 
-                $placeXRaw = (string)($place["x"] ?? "");
-                $placeYRaw = (string)($place["y"] ?? "");
-                if (!is_numeric($placeXRaw) || !is_numeric($placeYRaw)) {
-                    continue;
+                foreach ($documents as $place) {
+                    $placeId = (string)($place["id"] ?? "");
+                    if ($placeId === "" || isset($seen[$placeId])) {
+                        continue;
+                    }
+
+                    $placeXRaw = (string)($place["x"] ?? "");
+                    $placeYRaw = (string)($place["y"] ?? "");
+                    if (!is_numeric($placeXRaw) || !is_numeric($placeYRaw)) {
+                        continue;
+                    }
+                    $placeX = (float)$placeXRaw;
+                    $placeY = (float)$placeYRaw;
+                    $distanceFromCenter = distance_meters($centerY, $centerX, $placeY, $placeX);
+                    if ($distanceFromCenter > $radius) {
+                        continue;
+                    }
+
+                    $seen[$placeId] = true;
+
+                    $categoryName = (string)($place["category_name"] ?? "");
+                    $leaf = "음식점";
+                    if ($categoryName !== "") {
+                        $parts = explode(">", $categoryName);
+                        $leaf = trim((string)$parts[count($parts) - 1]);
+                    }
+
+                    $items[] = [
+                        "id" => $placeId,
+                        "name" => (string)($place["place_name"] ?? "이름없음"),
+                        "category" => $leaf,
+                        "category_name" => $categoryName,
+                        "area" => (string)($place["address_name"] ?? ($place["road_address_name"] ?? "주소정보없음")),
+                        "distance_m" => $distanceFromCenter,
+                        "phone" => (string)($place["phone"] ?? ""),
+                        "place_url" => (string)($place["place_url"] ?? ""),
+                        "rating" => null,
+                        "price" => "정보없음",
+                    ];
                 }
-                $placeX = (float)$placeXRaw;
-                $placeY = (float)$placeYRaw;
-                $distanceFromCenter = distance_meters($centerY, $centerX, $placeY, $placeX);
-                if ($distanceFromCenter > $radius) {
-                    continue;
+
+                $meta = $payload["meta"] ?? [];
+                if (($meta["is_end"] ?? false) === true) {
+                    break;
                 }
-
-                $seen[$placeId] = true;
-
-                $categoryName = (string)($place["category_name"] ?? "");
-                $leaf = "음식점";
-                if ($categoryName !== "") {
-                    $parts = explode(">", $categoryName);
-                    $leaf = trim((string)$parts[count($parts) - 1]);
+                if (count($items) >= $targetCount * 2) {
+                    break 2;
                 }
-
-                $items[] = [
-                    "id" => $placeId,
-                    "name" => (string)($place["place_name"] ?? "이름없음"),
-                    "category" => $leaf,
-                    "category_name" => $categoryName,
-                    "area" => (string)($place["address_name"] ?? ($place["road_address_name"] ?? "주소정보없음")),
-                    "distance_m" => $distanceFromCenter,
-                    "phone" => (string)($place["phone"] ?? ""),
-                    "place_url" => (string)($place["place_url"] ?? ""),
-                    "rating" => null,
-                    "price" => "정보없음",
-                ];
             }
-
-            $meta = $payload["meta"] ?? [];
-            if (($meta["is_end"] ?? false) === true) {
-                break;
-            }
-            if (count($items) >= $targetCount) {
-                break;
-            }
-        }
-        if (count($items) >= $targetCount) {
-            break;
         }
     }
 
-    return $items;
+    // 최종 수집된 목록 셔플 후 목표 개수만큼 리턴하여 결과 다양성 극대화
+    shuffle($items);
+    return array_slice($items, 0, $targetCount);
 }
 
 load_env(__DIR__ . "/../.env");

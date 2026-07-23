@@ -80,66 +80,73 @@ def fetch_nearby_restaurants(
         center_x, center_y = _find_center(api_key=api_key)
 
     points = _build_search_points(center_x, center_y, radius)
+    # 지점 순서를 섞어서 위치 편중 방지
+    import random
+    random.shuffle(points)
+
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
+    sort_options = ["accuracy", "distance"]
 
-    for point_x, point_y in points:
-        for page in range(1, 45):
-            payload = _kakao_get(
-                "/v2/local/search/category.json",
-                {
-                    "category_group_code": "FD6",
-                    "x": point_x,
-                    "y": point_y,
-                    "radius": radius,
-                    "sort": "accuracy",
-                    "size": 15,
-                    "page": page,
-                },
-                api_key,
-            )
-
-            docs = payload.get("documents", [])
-            if not docs:
-                break
-
-            for place in docs:
-                place_id = place.get("id")
-                if not place_id or place_id in seen:
-                    continue
-
-                place_x = float(place.get("x", "0"))
-                place_y = float(place.get("y", "0"))
-                dist_from_center = _distance_meters(center_y, center_x, place_y, place_x)
-                if dist_from_center > radius:
-                    continue
-
-                seen.add(place_id)
-                category_name = place.get("category_name", "")
-                category_leaf = category_name.split(">")[-1].strip() if category_name else "음식점"
-
-                items.append(
+    for sort_mode in sort_options:
+        for point_x, point_y in points:
+            for page in range(1, 6):
+                payload = _kakao_get(
+                    "/v2/local/search/category.json",
                     {
-                        "id": place_id,
-                        "name": place.get("place_name", "이름없음"),
-                        "category": category_leaf,
-                        "category_name": category_name,
-                        "area": place.get("address_name") or place.get("road_address_name") or "주소정보없음",
-                        "distance_m": dist_from_center,
-                        "phone": place.get("phone", ""),
-                        "place_url": place.get("place_url", ""),
-                        "rating": None,
-                        "price": "정보없음",
-                    }
+                        "category_group_code": "FD6",
+                        "x": point_x,
+                        "y": point_y,
+                        "radius": radius,
+                        "sort": sort_mode,
+                        "size": 15,
+                        "page": page,
+                    },
+                    api_key,
                 )
 
-            meta = payload.get("meta", {})
-            if meta.get("is_end"):
-                break
-            if len(items) >= target_count:
+                docs = payload.get("documents", [])
+                if not docs:
+                    break
+
+                for place in docs:
+                    place_id = place.get("id")
+                    if not place_id or place_id in seen:
+                        continue
+
+                    place_x = float(place.get("x", "0"))
+                    place_y = float(place.get("y", "0"))
+                    dist_from_center = _distance_meters(center_y, center_x, place_y, place_x)
+                    if dist_from_center > radius:
+                        continue
+
+                    seen.add(place_id)
+                    category_name = place.get("category_name", "")
+                    category_leaf = category_name.split(">")[-1].strip() if category_name else "음식점"
+
+                    items.append(
+                        {
+                            "id": place_id,
+                            "name": place.get("place_name", "이름없음"),
+                            "category": category_leaf,
+                            "category_name": category_name,
+                            "area": place.get("address_name") or place.get("road_address_name") or "주소정보없음",
+                            "distance_m": dist_from_center,
+                            "phone": place.get("phone", ""),
+                            "place_url": place.get("place_url", ""),
+                            "rating": None,
+                            "price": "정보없음",
+                        }
+                    )
+
+                meta = payload.get("meta", {})
+                if meta.get("is_end"):
+                    break
+                if len(items) >= target_count * 2:
+                    break
+
+            if len(items) >= target_count * 2:
                 break
 
-        if len(items) >= target_count:
-            break
-
-    return items
+    random.shuffle(items)
+    return items[:target_count]
