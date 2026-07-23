@@ -20,6 +20,19 @@ $apiPath = $basePath . "/api/restaurants.php";
       <p class="sub">버튼을 누르면 랜덤 맛집이 빠칭코처럼 돌아가며 멈춥니다.</p>
       <p id="sourceText" class="source">데이터 소스: 로딩 중...</p>
       <p id="noticeText" class="notice">식당 정보를 불러오는 중입니다.</p>
+      <section class="controls">
+        <button id="locationBtn" class="control-btn" type="button">현재 위치 사용</button>
+        <label class="radius-label" for="radiusSelect">반경</label>
+        <select id="radiusSelect" class="radius-select">
+          <option value="1">1km</option>
+          <option value="2" selected>2km</option>
+          <option value="3">3km</option>
+          <option value="4">4km</option>
+          <option value="5">5km</option>
+        </select>
+        <button id="reloadBtn" class="control-btn secondary" type="button">주변 식당 불러오기</button>
+      </section>
+      <p id="locationStatus" class="location-status">기본 위치 사용: LS용산타워</p>
 
       <section class="machine">
         <div class="pointer"></div>
@@ -38,6 +51,7 @@ $apiPath = $basePath . "/api/restaurants.php";
 
     <script>
       window.API_URL = <?= json_encode($apiPath, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+      window.DEFAULT_LOCATION_LABEL = "LS용산타워";
     </script>
     <script src="<?= htmlspecialchars($appJsPath, ENT_QUOTES, 'UTF-8') ?>"></script>
   </body>

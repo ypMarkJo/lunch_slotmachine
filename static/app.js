@@ -5,12 +5,20 @@ const resultName = document.getElementById("resultName");
 const resultMeta = document.getElementById("resultMeta");
 const sourceText = document.getElementById("sourceText");
 const noticeText = document.getElementById("noticeText");
+const locationBtn = document.getElementById("locationBtn");
+const radiusSelect = document.getElementById("radiusSelect");
+const reloadBtn = document.getElementById("reloadBtn");
+const locationStatus = document.getElementById("locationStatus");
 
 const ITEM_HEIGHT = 90;
 const REPEAT_COUNT = 20;
 const apiUrl = window.API_URL || "./api/restaurants.php";
+const defaultLocationLabel = window.DEFAULT_LOCATION_LABEL || "LS용산타워";
 let spinning = false;
 let restaurants = [];
+let loading = false;
+let userCoords = null;
+let radiusKm = Number.parseInt(radiusSelect?.value || "2", 10) || 2;
 
 function applyRestaurants(data) {
   restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
@@ -20,6 +28,56 @@ function applyRestaurants(data) {
   if (noticeText) {
     noticeText.textContent = data.notice || "";
   }
+  if (!userCoords && locationStatus && data.location) {
+    locationStatus.textContent = `기본 위치 사용: ${data.location}`;
+  }
+}
+
+function setNotice(message) {
+  if (noticeText) {
+    noticeText.textContent = message;
+  }
+}
+
+function clampRadius(value) {
+  if (!Number.isFinite(value)) return 2;
+  return Math.min(5, Math.max(1, Math.round(value)));
+}
+
+function updateLocationUi() {
+  if (locationBtn) {
+    locationBtn.textContent = userCoords ? "기본 위치로 되돌리기" : "현재 위치 사용";
+  }
+  if (locationStatus) {
+    if (userCoords) {
+      locationStatus.textContent = `현재 위치 사용 중 (반경 ${radiusKm}km)`;
+    } else {
+      locationStatus.textContent = `기본 위치 사용: ${defaultLocationLabel} (반경 ${radiusKm}km)`;
+    }
+  }
+}
+
+function setLoading(state) {
+  loading = state;
+  if (reloadBtn) {
+    reloadBtn.disabled = state;
+  }
+  if (locationBtn) {
+    locationBtn.disabled = state;
+  }
+  if (radiusSelect) {
+    radiusSelect.disabled = state;
+  }
+}
+
+function buildApiUrl() {
+  const requestUrl = new URL(apiUrl, window.location.href);
+  requestUrl.searchParams.set("radius_km", String(radiusKm));
+  if (userCoords) {
+    requestUrl.searchParams.set("lat", String(userCoords.lat));
+    requestUrl.searchParams.set("lng", String(userCoords.lng));
+  }
+  return requestUrl.toString();
 }
 
 function buildReel() {
@@ -36,7 +94,7 @@ function buildReel() {
     }
   }
   reel.innerHTML = items.join("");
-  spinBtn.disabled = false;
+  spinBtn.disabled = loading;
 }
 
 function easeOutCubic(t) {
@@ -95,11 +153,12 @@ function spin() {
 }
 
 async function loadRestaurants() {
+  setLoading(true);
   spinBtn.disabled = true;
   reel.innerHTML = '<div class="item">불러오는 중...</div>';
 
   try {
-    const response = await fetch(apiUrl, { cache: "no-store" });
+    const response = await fetch(buildApiUrl(), { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -110,7 +169,8 @@ async function loadRestaurants() {
     if (Array.isArray(embedded) && embedded.length > 0) {
       applyRestaurants({
         source: "Flask 내장 데이터",
-        notice: "PHP API 대신 Flask 렌더 데이터로 표시 중입니다.",
+        notice: "API 호출 실패로 내장 샘플 데이터를 표시 중입니다. 위치/반경 변경은 API 실행 시 사용할 수 있습니다.",
+        location: defaultLocationLabel,
         restaurants: embedded,
       });
     } else {
@@ -118,14 +178,88 @@ async function loadRestaurants() {
       if (sourceText) {
         sourceText.textContent = "데이터 소스: 로드 실패";
       }
-      if (noticeText) {
-        noticeText.textContent = `식당 데이터를 불러오지 못했습니다. (${error.message})`;
-      }
+      setNotice(`식당 데이터를 불러오지 못했습니다. (${error.message})`);
     }
   }
 
   buildReel();
+  updateLocationUi();
+  setLoading(false);
+}
+
+function requestCurrentLocation() {
+  if (!navigator.geolocation) {
+    setNotice("브라우저가 위치 정보를 지원하지 않아 기본 위치로 조회합니다.");
+    return;
+  }
+
+  setLoading(true);
+  setNotice("현재 위치를 가져오는 중입니다...");
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userCoords = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      updateLocationUi();
+      loadRestaurants();
+    },
+    (error) => {
+      setLoading(false);
+      updateLocationUi();
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setNotice("위치 권한이 거부되어 기본 위치로 조회합니다.");
+          break;
+        case error.TIMEOUT:
+          setNotice("위치 확인 시간이 초과되어 기본 위치로 조회합니다.");
+          break;
+        default:
+          setNotice("현재 위치를 확인하지 못해 기본 위치로 조회합니다.");
+          break;
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    }
+  );
 }
 
 spinBtn.addEventListener("click", spin);
+if (reloadBtn) {
+  reloadBtn.addEventListener("click", () => {
+    if (!loading) {
+      loadRestaurants();
+    }
+  });
+}
+if (radiusSelect) {
+  radiusSelect.addEventListener("change", () => {
+    radiusKm = clampRadius(Number.parseInt(radiusSelect.value, 10));
+    updateLocationUi();
+    if (!loading) {
+      loadRestaurants();
+    }
+  });
+}
+if (locationBtn) {
+  locationBtn.addEventListener("click", () => {
+    if (loading) return;
+
+    if (userCoords) {
+      userCoords = null;
+      updateLocationUi();
+      setNotice(`기본 위치(${defaultLocationLabel})로 전환했습니다.`);
+      loadRestaurants();
+      return;
+    }
+
+    requestCurrentLocation();
+  });
+}
+
+updateLocationUi();
 loadRestaurants();

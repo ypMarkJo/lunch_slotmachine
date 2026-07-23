@@ -34,8 +34,18 @@ def _find_center(api_key: str, keyword: str = "LS용산타워") -> tuple[float, 
     return float(center["x"]), float(center["y"])
 
 
-def fetch_nearby_restaurants(api_key: str, radius: int = 2000, max_pages: int = 3) -> list[dict[str, Any]]:
-    center_x, center_y = _find_center(api_key=api_key)
+def fetch_nearby_restaurants(
+    api_key: str,
+    radius: int = 2000,
+    max_pages: int = 3,
+    latitude: float | None = None,
+    longitude: float | None = None,
+) -> list[dict[str, Any]]:
+    if latitude is not None and longitude is not None:
+        center_x = longitude
+        center_y = latitude
+    else:
+        center_x, center_y = _find_center(api_key=api_key)
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
 

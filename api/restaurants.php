@@ -80,9 +80,51 @@ function find_center(string $apiKey): array
     return [(float)($center["x"] ?? 0), (float)($center["y"] ?? 0)];
 }
 
-function fetch_nearby_restaurants(string $apiKey, int $radius = 2000, int $maxPages = 3): array
+function parse_radius_km(mixed $raw, int $default = 2): int
 {
-    [$x, $y] = find_center($apiKey);
+    if (is_string($raw) && preg_match('/^\d+$/', $raw) === 1) {
+        $value = (int)$raw;
+    } elseif (is_int($raw)) {
+        $value = $raw;
+    } else {
+        $value = $default;
+    }
+
+    return max(1, min(5, $value));
+}
+
+function parse_coordinate(mixed $raw, float $min, float $max): ?float
+{
+    if (!is_string($raw) || trim($raw) === "") {
+        return null;
+    }
+
+    if (!is_numeric($raw)) {
+        return null;
+    }
+
+    $value = (float)$raw;
+    if ($value < $min || $value > $max) {
+        return null;
+    }
+
+    return $value;
+}
+
+function fetch_nearby_restaurants(
+    string $apiKey,
+    int $radius = 2000,
+    int $maxPages = 3,
+    ?float $longitude = null,
+    ?float $latitude = null
+): array {
+    if ($longitude !== null && $latitude !== null) {
+        $x = $longitude;
+        $y = $latitude;
+    } else {
+        [$x, $y] = find_center($apiKey);
+    }
+
     $items = [];
     $seen = [];
 
@@ -145,24 +187,32 @@ function fetch_nearby_restaurants(string $apiKey, int $radius = 2000, int $maxPa
 load_env(__DIR__ . "/../.env");
 $sampleRestaurants = require __DIR__ . "/../data/sample_restaurants.php";
 $apiKey = getenv("KAKAO_REST_API_KEY");
+$radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 2);
+$radiusMeter = $radiusKm * 1000;
+$latitude = parse_coordinate($_GET["lat"] ?? null, -90.0, 90.0);
+$longitude = parse_coordinate($_GET["lng"] ?? null, -180.0, 180.0);
+$usingCurrentLocation = $latitude !== null && $longitude !== null;
+$locationLabel = $usingCurrentLocation ? "현재 위치" : "LS용산타워";
 
 $response = [
     "source" => "샘플 데이터",
-    "notice" => "KAKAO_REST_API_KEY 미설정으로 샘플 데이터를 표시 중입니다.",
+    "location" => $locationLabel,
+    "notice" => "KAKAO_REST_API_KEY 미설정으로 샘플 데이터를 표시 중입니다. (반경 {$radiusKm}km)",
     "restaurants" => $sampleRestaurants,
 ];
 
 if (is_string($apiKey) && trim($apiKey) !== "") {
     try {
-        $restaurants = fetch_nearby_restaurants($apiKey, 2000, 3);
+        $restaurants = fetch_nearby_restaurants($apiKey, $radiusMeter, 3, $longitude, $latitude);
         if (count($restaurants) > 0) {
             $response = [
                 "source" => "카카오 로컬 API",
-                "notice" => "LS용산타워 반경 2km 식당 데이터를 표시 중입니다. (평점은 공식 Local API 미제공)",
+                "location" => $locationLabel,
+                "notice" => "{$locationLabel} 반경 {$radiusKm}km 식당 데이터를 표시 중입니다. (평점은 공식 Local API 미제공)",
                 "restaurants" => $restaurants,
             ];
         } else {
-            $response["notice"] = "카카오 조회 결과가 비어 샘플 데이터로 대체했습니다.";
+            $response["notice"] = "{$locationLabel} 반경 {$radiusKm}km 조회 결과가 비어 샘플 데이터로 대체했습니다.";
         }
     } catch (Throwable $e) {
         $response["notice"] = "카카오 조회 실패로 샘플 데이터로 대체했습니다. (" . $e->getMessage() . ")";

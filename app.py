@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
 
 from data.kakao_places import fetch_nearby_restaurants
 from data.restaurants import RESTAURANTS
 
 app = Flask(__name__)
+DEFAULT_LOCATION_LABEL = "LS용산타워"
 
 
 def load_dotenv(path: str = ".env") -> None:
@@ -30,33 +31,81 @@ def load_dotenv(path: str = ".env") -> None:
 load_dotenv()
 
 
-@app.get("/")
-def index():
+def parse_radius_km(raw: str | None, default: int = 2) -> int:
+    try:
+        value = int(raw) if raw is not None else default
+    except ValueError:
+        value = default
+    return max(1, min(5, value))
+
+
+def parse_coordinate(raw: str | None, minimum: float, maximum: float) -> float | None:
+    if raw is None:
+        return None
+    try:
+        value = float(raw)
+    except ValueError:
+        return None
+    if value < minimum or value > maximum:
+        return None
+    return value
+
+
+def build_restaurant_payload(radius_km: int, latitude: float | None = None, longitude: float | None = None) -> dict:
     api_key = os.getenv("KAKAO_REST_API_KEY")
+    using_current_location = latitude is not None and longitude is not None
+    location_label = "현재 위치" if using_current_location else DEFAULT_LOCATION_LABEL
+
     source = "샘플 데이터"
-    notice = "KAKAO_REST_API_KEY 미설정으로 샘플 데이터를 표시 중입니다."
+    notice = f"KAKAO_REST_API_KEY 미설정으로 샘플 데이터를 표시 중입니다. (반경 {radius_km}km)"
     restaurants = RESTAURANTS
 
     if api_key:
         try:
-            restaurants = fetch_nearby_restaurants(api_key=api_key, radius=2000, max_pages=3)
+            restaurants = fetch_nearby_restaurants(
+                api_key=api_key,
+                radius=radius_km * 1000,
+                max_pages=3,
+                latitude=latitude,
+                longitude=longitude,
+            )
             source = "카카오 로컬 API"
-            notice = "LS용산타워 반경 2km 식당 데이터를 표시 중입니다. (평점 데이터는 카카오 로컬 API 미제공)"
+            notice = f"{location_label} 반경 {radius_km}km 식당 데이터를 표시 중입니다. (평점 데이터는 카카오 로컬 API 미제공)"
             if not restaurants:
                 restaurants = RESTAURANTS
                 source = "샘플 데이터"
-                notice = "카카오 조회 결과가 비어 샘플 데이터로 대체했습니다."
+                notice = f"{location_label} 반경 {radius_km}km 조회 결과가 비어 샘플 데이터로 대체했습니다."
         except RuntimeError as error:
             restaurants = RESTAURANTS
             source = "샘플 데이터"
             notice = f"카카오 조회 실패로 샘플 데이터로 대체했습니다. ({error})"
 
+    return {
+        "restaurants": restaurants,
+        "source": source,
+        "notice": notice,
+        "location": location_label,
+    }
+
+
+@app.get("/")
+def index():
+    payload = build_restaurant_payload(radius_km=2)
     return render_template(
         "index.html",
-        restaurants=restaurants,
-        source=source,
-        notice=notice,
+        restaurants=payload["restaurants"],
+        source=payload["source"],
+        notice=payload["notice"],
     )
+
+
+@app.get("/api/restaurants")
+def api_restaurants():
+    radius_km = parse_radius_km(request.args.get("radius_km"), default=2)
+    latitude = parse_coordinate(request.args.get("lat"), minimum=-90.0, maximum=90.0)
+    longitude = parse_coordinate(request.args.get("lng"), minimum=-180.0, maximum=180.0)
+    payload = build_restaurant_payload(radius_km=radius_km, latitude=latitude, longitude=longitude)
+    return jsonify(payload)
 
 
 if __name__ == "__main__":
