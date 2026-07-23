@@ -5,7 +5,6 @@ const resultName = document.getElementById("resultName");
 const resultMeta = document.getElementById("resultMeta");
 const mapLink = document.getElementById("mapLink");
 const noticeText = document.getElementById("noticeText");
-const locationBtn = document.getElementById("locationBtn");
 const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
@@ -58,9 +57,6 @@ function setNotice(message) {
 }
 
 function updateLocationUi() {
-  if (locationBtn) {
-    locationBtn.textContent = userCoords ? "📍 기본 위치로 되돌리기" : "📍 현재 위치 사용";
-  }
   if (locationStatus) {
     const formattedRadius = formatRadiusText(radiusKm);
     if (userCoords) {
@@ -75,9 +71,6 @@ function setLoading(state) {
   loading = state;
   if (reloadBtn) {
     reloadBtn.disabled = state;
-  }
-  if (locationBtn) {
-    locationBtn.disabled = state;
   }
   if (radiusRange) {
     radiusRange.disabled = state;
@@ -293,21 +286,6 @@ if (radiusRange) {
     updateRadiusDisplay();
     updateLocationUi();
     setNotice("거리 설정이 변경되었습니다. '주변 식당 불러오기' 버튼을 눌러 목록을 갱신하세요.");
-  });
-}
-if (locationBtn) {
-  locationBtn.addEventListener("click", () => {
-    if (loading) return;
-
-    if (userCoords) {
-      userCoords = null;
-      updateLocationUi();
-      setNotice(`기본 위치(${defaultLocationLabel})로 전환했습니다.`);
-      loadRestaurants();
-      return;
-    }
-
-    requestCurrentLocation();
   });
 }
 
