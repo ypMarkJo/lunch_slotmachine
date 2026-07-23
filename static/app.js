@@ -155,7 +155,7 @@ function updateModalContent(winner) {
 
   const metaParts = [winner.category];
   if (winner.distance_m !== undefined && winner.distance_m !== null) {
-    const paceValue = Number.parseInt(paceSelect?.value || "1200", 10) || 1200;
+    const paceValue = Number.parseInt(paceSelect?.value || "720", 10) || 720;
     const totalSeconds = (winner.distance_m / 1000) * paceValue;
     const mins = Math.floor(totalSeconds / 60);
     const secs = Math.round(totalSeconds % 60);

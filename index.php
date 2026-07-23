@@ -61,14 +61,14 @@ $apiPath = $basePath . "/api/restaurants.php";
           <div class="pace-control modal-pace">
             <label class="pace-label" for="paceSelect">1km 페이스 선택 🏃‍♂️</label>
             <select id="paceSelect" class="pace-select">
-              <option value="1200">1200 페이스 (12분/km, 기본보통)</option>
-              <option value="1000">1000 페이스 (10분/km)</option>
-              <option value="800">800 페이스 (8분/km, 빠른걸음)</option>
-              <option value="700">700 페이스 (7분/km)</option>
-              <option value="600">600 페이스 (6분/km, 조깅)</option>
-              <option value="500">500 페이스 (5분/km, 러닝)</option>
-              <option value="400">400 페이스 (4분/km, 맹렬질주)</option>
-              <option value="300">300 페이스 (3분/km, 국가대표)</option>
+              <option value="720">1200 페이스 (12분/km, 기본보통)</option>
+              <option value="600">1000 페이스 (10분/km)</option>
+              <option value="480">800 페이스 (8분/km, 빠른걸음)</option>
+              <option value="420">700 페이스 (7분/km)</option>
+              <option value="360">600 페이스 (6분/km, 조깅)</option>
+              <option value="300">500 페이스 (5분/km, 러닝)</option>
+              <option value="240">400 페이스 (4분/km, 맹렬질주)</option>
+              <option value="180">300 페이스 (3분/km, 국가대표)</option>
             </select>
           </div>
           <div id="adArea" class="ad-area">
