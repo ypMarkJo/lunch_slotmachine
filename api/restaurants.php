@@ -127,9 +127,9 @@ function offset_coordinate(float $latitude, float $longitude, float $distanceMet
 function build_search_points(float $centerX, float $centerY, int $radius): array
 {
     $points = [[$centerX, $centerY]];
-    if ($radius >= 200) {
-        $ringDistance = $radius * 0.55;
-        foreach ([0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0] as $bearing) {
+    if ($radius >= 500) {
+        $ringDistance = $radius * 0.6;
+        foreach ([0.0, 90.0, 180.0, 270.0] as $bearing) {
             [$lat, $lng] = offset_coordinate($centerY, $centerX, $ringDistance, $bearing);
             $points[] = [$lng, $lat];
         }

@@ -57,10 +57,10 @@ def _distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> int:
 
 def _build_search_points(center_x: float, center_y: float, radius: int) -> list[tuple[float, float]]:
     points = [(center_x, center_y)]
-    if radius >= 200:
-        ring_distance = radius * 0.55
-        for bearing in range(0, 360, 45):
-            lat, lng = _offset_coordinate(center_y, center_x, ring_distance, float(bearing))
+    if radius >= 500:
+        ring_distance = radius * 0.6
+        for bearing in (0.0, 90.0, 180.0, 270.0):
+            lat, lng = _offset_coordinate(center_y, center_x, ring_distance, bearing)
             points.append((lng, lat))
     return points
 
