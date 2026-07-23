@@ -3,6 +3,7 @@ const reel = document.getElementById("reel");
 const resultCard = document.getElementById("resultCard");
 const resultName = document.getElementById("resultName");
 const resultMeta = document.getElementById("resultMeta");
+const mapLink = document.getElementById("mapLink");
 const sourceText = document.getElementById("sourceText");
 const noticeText = document.getElementById("noticeText");
 const locationBtn = document.getElementById("locationBtn");
@@ -101,6 +102,15 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
+function getMapUrl(restaurant) {
+  if (restaurant.place_url) {
+    return restaurant.place_url;
+  }
+
+  const query = [restaurant.name, restaurant.area].filter(Boolean).join(" ");
+  return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
+}
+
 function spin() {
   if (spinning || restaurants.length === 0) return;
 
@@ -142,6 +152,9 @@ function spin() {
       metaParts.push("평점정보없음");
     }
     resultMeta.textContent = metaParts.join(" · ");
+    if (mapLink) {
+      mapLink.href = getMapUrl(winner);
+    }
 
     resultCard.classList.remove("hidden");
 
@@ -182,9 +195,9 @@ async function loadRestaurants() {
     }
   }
 
+  setLoading(false);
   buildReel();
   updateLocationUi();
-  setLoading(false);
 }
 
 function requestCurrentLocation() {

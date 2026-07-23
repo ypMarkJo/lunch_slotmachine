@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 
 from flask import Flask, jsonify, render_template, request
 
@@ -31,7 +32,7 @@ def load_dotenv(path: str = ".env") -> None:
 load_dotenv()
 
 
-def parse_radius_km(raw: str | None, default: int = 2) -> int:
+def parse_radius_km(raw: Optional[str], default: int = 2) -> int:
     try:
         value = int(raw) if raw is not None else default
     except ValueError:
@@ -39,7 +40,7 @@ def parse_radius_km(raw: str | None, default: int = 2) -> int:
     return max(1, min(5, value))
 
 
-def parse_coordinate(raw: str | None, minimum: float, maximum: float) -> float | None:
+def parse_coordinate(raw: Optional[str], minimum: float, maximum: float) -> Optional[float]:
     if raw is None:
         return None
     try:
@@ -51,7 +52,9 @@ def parse_coordinate(raw: str | None, minimum: float, maximum: float) -> float |
     return value
 
 
-def build_restaurant_payload(radius_km: int, latitude: float | None = None, longitude: float | None = None) -> dict:
+def build_restaurant_payload(
+    radius_km: int, latitude: Optional[float] = None, longitude: Optional[float] = None
+) -> dict:
     api_key = os.getenv("KAKAO_REST_API_KEY")
     using_current_location = latitude is not None and longitude is not None
     location_label = "현재 위치" if using_current_location else DEFAULT_LOCATION_LABEL

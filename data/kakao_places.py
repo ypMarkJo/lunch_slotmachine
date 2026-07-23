@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -38,8 +38,8 @@ def fetch_nearby_restaurants(
     api_key: str,
     radius: int = 2000,
     max_pages: int = 3,
-    latitude: float | None = None,
-    longitude: float | None = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
 ) -> list[dict[str, Any]]:
     if latitude is not None and longitude is not None:
         center_x = longitude

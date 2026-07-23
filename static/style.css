@@ -167,6 +167,18 @@ h1 {
   color: var(--muted);
 }
 
+.map-link {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #4a63ad;
+  color: #e6eeff;
+  text-decoration: none;
+  background: #1f2f57;
+  font-weight: 600;
+}
+
 .hidden {
   display: none;
 }

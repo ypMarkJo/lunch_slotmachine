@@ -46,6 +46,7 @@ $apiPath = $basePath . "/api/restaurants.php";
       <section id="resultCard" class="result hidden">
         <h2 id="resultName"></h2>
         <p id="resultMeta"></p>
+        <a id="mapLink" class="map-link" href="#" target="_blank" rel="noopener noreferrer">가게 보기</a>
       </section>
     </main>
 
