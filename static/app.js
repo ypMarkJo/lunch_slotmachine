@@ -7,8 +7,9 @@ const mapLink = document.getElementById("mapLink");
 const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
-
 const categorySelect = document.getElementById("categorySelect");
+const modalOverlay = document.getElementById("modalOverlay");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
 const ITEM_HEIGHT = 90;
 const REPEAT_COUNT = 20;
@@ -133,12 +134,24 @@ function getMapUrl(restaurant) {
   return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
 }
 
+function hideModal() {
+  if (modalOverlay) {
+    modalOverlay.classList.add("hidden");
+  }
+}
+
+function showModal() {
+  if (modalOverlay) {
+    modalOverlay.classList.remove("hidden");
+  }
+}
+
 function spin() {
   if (spinning || restaurants.length === 0) return;
 
   spinning = true;
   spinBtn.disabled = true;
-  resultCard.classList.add("hidden");
+  hideModal();
 
   const winnerIndex = getNextWinnerIndex();
   if (winnerIndex < 0) return;
@@ -179,7 +192,7 @@ function spin() {
       mapLink.href = getMapUrl(winner);
     }
 
-    resultCard.classList.remove("hidden");
+    showModal();
 
     spinning = false;
     spinBtn.disabled = false;
@@ -301,8 +314,16 @@ if (categorySelect) {
     filterRestaurants();
     recommendationPool = [];
     buildReel();
-    if (resultCard) {
-      resultCard.classList.add("hidden");
+    hideModal();
+  });
+}
+if (closeModalBtn) {
+  closeModalBtn.addEventListener("click", hideModal);
+}
+if (modalOverlay) {
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+      hideModal();
     }
   });
 }
