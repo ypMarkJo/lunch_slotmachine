@@ -23,6 +23,19 @@ $apiPath = $basePath . "/api/restaurants.php";
           <label class="radius-label" for="radiusRange">최대거리: <span id="radiusValue">100m</span></label>
           <input id="radiusRange" type="range" min="0.1" max="5.0" step="0.1" value="0.1" class="radius-slider" />
         </div>
+        <div class="category-control">
+          <label class="category-label" for="categorySelect">카테고리</label>
+          <select id="categorySelect" class="category-select">
+            <option value="ALL">전체 음식점</option>
+            <option value="한식">한식 🍚</option>
+            <option value="양식">양식 🍝</option>
+            <option value="일식">일식 🍣</option>
+            <option value="중식">중식 🥟</option>
+            <option value="분식">분식 떡볶이</option>
+            <option value="패스트푸드">패스트푸드 🍔</option>
+            <option value="카페">카페/디저트 ☕</option>
+          </select>
+        </div>
         <button id="reloadBtn" class="control-btn secondary" type="button">🔄 주변 식당 불러오기</button>
       </section>
 

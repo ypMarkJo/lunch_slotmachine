@@ -123,6 +123,7 @@ def fetch_nearby_restaurants(
                         "id": place_id,
                         "name": place.get("place_name", "이름없음"),
                         "category": category_leaf,
+                        "category_name": category_name,
                         "area": place.get("address_name") or place.get("road_address_name") or "주소정보없음",
                         "distance_m": dist_from_center,
                         "phone": place.get("phone", ""),

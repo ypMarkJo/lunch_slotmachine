@@ -223,6 +223,7 @@ function fetch_nearby_restaurants(
                     "id" => $placeId,
                     "name" => (string)($place["place_name"] ?? "이름없음"),
                     "category" => $leaf,
+                    "category_name" => $categoryName,
                     "area" => (string)($place["address_name"] ?? ($place["road_address_name"] ?? "주소정보없음")),
                     "distance_m" => $distanceFromCenter,
                     "phone" => (string)($place["phone"] ?? ""),

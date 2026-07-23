@@ -8,15 +8,19 @@ const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
 
+const categorySelect = document.getElementById("categorySelect");
+
 const ITEM_HEIGHT = 90;
 const REPEAT_COUNT = 20;
 const apiUrl = window.API_URL || "./api/restaurants.php";
 const defaultLocationLabel = window.DEFAULT_LOCATION_LABEL || "LS용산타워";
 let spinning = false;
+let rawRestaurants = [];
 let restaurants = [];
 let loading = false;
 let userCoords = null;
 let radiusKm = parseRadiusValue(radiusRange?.value || "0.1");
+let selectedCategory = "ALL";
 
 function parseRadiusValue(value) {
   const parsed = Number.parseFloat(value);
@@ -37,8 +41,22 @@ function updateRadiusDisplay() {
   }
 }
 
+function filterRestaurants() {
+  if (!selectedCategory || selectedCategory === "ALL") {
+    restaurants = [...rawRestaurants];
+    return;
+  }
+
+  restaurants = rawRestaurants.filter((r) => {
+    const cat = r.category || "";
+    const catName = r.category_name || "";
+    return cat.includes(selectedCategory) || catName.includes(selectedCategory);
+  });
+}
+
 function applyRestaurants(data) {
-  restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
+  rawRestaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
+  filterRestaurants();
   recommendationPool = [];
 }
 
@@ -275,6 +293,17 @@ if (radiusRange) {
     updateRadiusDisplay();
     updateLocationUi();
     setNotice("거리 설정이 변경되었습니다. '주변 식당 불러오기' 버튼을 눌러 목록을 갱신하세요.");
+  });
+}
+if (categorySelect) {
+  categorySelect.addEventListener("change", () => {
+    selectedCategory = categorySelect.value;
+    filterRestaurants();
+    recommendationPool = [];
+    buildReel();
+    if (resultCard) {
+      resultCard.classList.add("hidden");
+    }
   });
 }
 
