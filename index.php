@@ -14,7 +14,7 @@ $apiPath = $basePath . "/api/restaurants.php";
     <title>점심 빠칭코 추천</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Outfit:wght@800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@700;800&family=Outfit:wght@700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="<?= htmlspecialchars($stylePath, ENT_QUOTES, 'UTF-8') ?>" />
   </head>
   <body>
