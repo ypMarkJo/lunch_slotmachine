@@ -179,13 +179,11 @@ function spin() {
     if (winner.distance_m !== undefined && winner.distance_m !== null) {
       metaParts.push(`${winner.distance_m}m`);
     }
-    if (winner.price) {
+    if (winner.price && winner.price !== "정보없음") {
       metaParts.push(winner.price);
     }
     if (winner.rating !== null && winner.rating !== undefined) {
       metaParts.push(`⭐ ${winner.rating}`);
-    } else {
-      metaParts.push("평점정보없음");
     }
     resultMeta.textContent = metaParts.join(" · ");
     if (mapLink) {
