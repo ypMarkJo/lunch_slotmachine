@@ -350,31 +350,28 @@ body {
 }
 
 .time-badge {
-  margin: 12px 0 16px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(255, 136, 0, 0.1));
-  border: 1px solid rgba(255, 204, 0, 0.4);
-  border-radius: 14px;
+  margin: 10px 0 14px;
+  padding: 10px 14px;
+  background: rgba(23, 33, 64, 0.8);
+  border: 1px solid #3b4e85;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 16px rgba(255, 204, 0, 0.15);
+  gap: 3px;
 }
 
 .time-label {
-  font-size: 0.78rem;
-  color: #ffe680;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .time-value {
-  font-size: 1.45rem;
-  font-weight: 900;
-  color: #ffffff;
-  font-family: 'Do Hyeon', 'Outfit', sans-serif;
-  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffe066;
+  font-family: 'Do Hyeon', sans-serif;
 }
 
 .ad-area {
