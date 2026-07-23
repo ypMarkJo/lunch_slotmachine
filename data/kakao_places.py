@@ -80,17 +80,26 @@ def fetch_nearby_restaurants(
         center_x, center_y = _find_center(api_key=api_key)
 
     points = _build_search_points(center_x, center_y, radius)
-    # 지점 순서를 섞어서 위치 편중 방지
     import random
+    import time
     random.shuffle(points)
 
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
     sort_options = ["accuracy", "distance"]
 
+    # 현재 시각(초) 기반 랜덤 페이지 생성
+    random.seed(int(time.time() * 100))
+
     for sort_mode in sort_options:
         for point_x, point_y in points:
-            for page in range(1, 6):
+            start_page = random.randint(1, 4)
+            pages_to_fetch = list(dict.fromkeys([1, start_page, start_page + 1, start_page + 2, random.randint(5, 10)]))
+
+            for page in pages_to_fetch:
+                if page > 45:
+                    continue
+
                 payload = _kakao_get(
                     "/v2/local/search/category.json",
                     {

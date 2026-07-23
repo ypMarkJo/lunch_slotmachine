@@ -172,14 +172,26 @@ function fetch_nearby_restaurants(
 
     $items = [];
     $seen = [];
-    // 정확도순(accuracy)과 거리순(distance)을 번갈아 수집해 유명 맛집과 숨은 맛집 조합
     $sortOptions = ["accuracy", "distance"];
+
+    // 요청 시각(초 단위) 기반으로 1~5 범위의 시작 페이지 오프셋 무작위 부여
+    $timeSeed = (int)date("s") + (int)floor(microtime(true) * 100);
+    mt_srand($timeSeed);
 
     foreach ($sortOptions as $sortMode) {
         foreach ($points as $point) {
             [$pointX, $pointY] = $point;
-            // 지점당 최대 5페이지씩 균등 긁기
-            for ($page = 1; $page <= 5; $page++) {
+
+            // 시각 기반 무작위 페이지 범위 생성 (예: 1~5페이지, 3~8페이지, 2~7페이지 등)
+            $startPage = mt_rand(1, 4);
+            $pagesToFetch = [1, $startPage, $startPage + 1, $startPage + 2, mt_rand(5, 10)];
+            $pagesToFetch = array_unique($pagesToFetch);
+
+            foreach ($pagesToFetch as $page) {
+                if ($page > 45) {
+                    continue;
+                }
+
                 $payload = kakao_get(
                     "/v2/local/search/category.json",
                     [
@@ -251,7 +263,7 @@ function fetch_nearby_restaurants(
         }
     }
 
-    // 최종 수집된 목록 셔플 후 목표 개수만큼 리턴하여 결과 다양성 극대화
+    // 최종 수집된 목록 셔플 후 200개 리턴
     shuffle($items);
     return array_slice($items, 0, $targetCount);
 }
