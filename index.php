@@ -20,7 +20,7 @@ $apiPath = $basePath . "/api/restaurants.php";
       <p class="guide-tip">💡 <strong>사용 방법:</strong> [거리 슬라이더 조절] → [주변 식당 불러오기] → [추천 시작(빠칭코)]</p>
       <section class="controls">
         <div class="radius-control">
-          <label class="radius-label" for="radiusRange">거리: <span id="radiusValue">100m</span></label>
+          <label class="radius-label" for="radiusRange">최대거리: <span id="radiusValue">100m</span></label>
           <input id="radiusRange" type="range" min="0.1" max="5.0" step="0.1" value="0.1" class="radius-slider" />
         </div>
         <button id="reloadBtn" class="control-btn secondary" type="button">🔄 주변 식당 불러오기</button>

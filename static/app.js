@@ -173,7 +173,13 @@ function spin() {
 async function loadRestaurants() {
   setLoading(true);
   spinBtn.disabled = true;
-  reel.innerHTML = '<div class="item">불러오는 중...</div>';
+  if (resultCard) {
+    resultCard.classList.add("hidden");
+  }
+  if (reel) {
+    reel.style.transform = "translateY(0)";
+    reel.innerHTML = '<div class="item">불러오는 중...</div>';
+  }
 
   try {
     const response = await fetch(buildApiUrl(), { cache: "no-store" });
