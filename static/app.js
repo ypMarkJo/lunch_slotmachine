@@ -4,7 +4,6 @@ const resultCard = document.getElementById("resultCard");
 const resultName = document.getElementById("resultName");
 const resultMeta = document.getElementById("resultMeta");
 const mapLink = document.getElementById("mapLink");
-const noticeText = document.getElementById("noticeText");
 const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
@@ -41,15 +40,10 @@ function updateRadiusDisplay() {
 function applyRestaurants(data) {
   restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
   recommendationPool = [];
-  if (noticeText) {
-    noticeText.textContent = data.notice || "";
-  }
 }
 
 function setNotice(message) {
-  if (noticeText) {
-    noticeText.textContent = message;
-  }
+  // notice text removed as requested
 }
 
 function updateLocationUi() {

@@ -17,7 +17,6 @@ $apiPath = $basePath . "/api/restaurants.php";
   <body>
     <main class="container">
       <h1>점심 메뉴 빠칭코</h1>
-      <p id="noticeText" class="notice">식당 정보를 불러오는 중입니다.</p>
       <p class="guide-tip">💡 <strong>사용 방법:</strong> [거리 슬라이더 조절] → [주변 식당 불러오기] → [추천 시작(빠칭코)]</p>
       <section class="controls">
         <div class="radius-control">
@@ -25,12 +24,12 @@ $apiPath = $basePath . "/api/restaurants.php";
           <input id="radiusRange" type="range" min="0.1" max="5.0" step="0.1" value="0.5" class="radius-slider" />
         </div>
         <button id="reloadBtn" class="control-btn secondary" type="button">🔄 주변 식당 불러오기</button>
+      </section>
+
       <section class="machine">
-        <div class="pointer-left"></div>
         <div class="window">
           <div id="reel" class="reel"></div>
         </div>
-        <div class="pointer-right"></div>
       </section>
 
       <button id="spinBtn" class="spin-btn">추천 시작</button>
