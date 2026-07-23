@@ -204,9 +204,7 @@ function spin() {
 async function loadRestaurants() {
   setLoading(true);
   spinBtn.disabled = true;
-  if (resultCard) {
-    resultCard.classList.add("hidden");
-  }
+  hideModal();
   if (reel) {
     reel.style.transform = "translateY(0)";
     reel.innerHTML = '<div class="item">불러오는 중...</div>';
