@@ -8,7 +8,6 @@ const noticeText = document.getElementById("noticeText");
 const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
-const locationStatus = document.getElementById("locationStatus");
 
 const ITEM_HEIGHT = 90;
 const REPEAT_COUNT = 20;
@@ -45,9 +44,6 @@ function applyRestaurants(data) {
   if (noticeText) {
     noticeText.textContent = data.notice || "";
   }
-  if (!userCoords && locationStatus && data.location) {
-    locationStatus.textContent = `기본 위치 사용: ${data.location}`;
-  }
 }
 
 function setNotice(message) {
@@ -57,14 +53,7 @@ function setNotice(message) {
 }
 
 function updateLocationUi() {
-  if (locationStatus) {
-    const formattedRadius = formatRadiusText(radiusKm);
-    if (userCoords) {
-      locationStatus.textContent = `현재 위치 사용 중 (거리 ${formattedRadius})`;
-    } else {
-      locationStatus.textContent = `기본 위치 사용: ${defaultLocationLabel} (거리 ${formattedRadius})`;
-    }
-  }
+  // locationStatus text removed as per design request
 }
 
 function setLoading(state) {

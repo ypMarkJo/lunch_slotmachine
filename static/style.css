@@ -128,28 +128,36 @@ h1 {
   height: 6px;
 }
 
-.location-status {
-  margin: 4px 0 10px;
-  color: #b3c6ff;
-  font-size: 0.9rem;
-}
-
 .machine {
   margin: 28px auto 20px;
   width: min(520px, 90vw);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.pointer {
+.pointer-left {
   width: 0;
   height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 18px solid var(--accent);
-  margin: 0 auto 8px;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  border-left: 18px solid var(--accent);
+  flex-shrink: 0;
+}
+
+.pointer-right {
+  width: 0;
+  height: 0;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  border-right: 18px solid var(--accent);
+  flex-shrink: 0;
 }
 
 .window {
+  flex: 1;
   height: 90px;
   overflow: hidden;
   border: 3px solid #33457f;
