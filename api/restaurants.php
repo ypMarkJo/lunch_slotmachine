@@ -251,7 +251,7 @@ function fetch_nearby_restaurants(
 load_env(__DIR__ . "/../.env");
 $sampleRestaurants = require __DIR__ . "/../data/sample_restaurants.php";
 $apiKey = getenv("KAKAO_REST_API_KEY");
-$radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 2.0);
+$radiusKm = parse_radius_km($_GET["radius_km"] ?? null, 0.5);
 $radiusMeter = (int)round($radiusKm * 1000);
 $maxPages = determine_max_pages($radiusKm);
 $latitude = parse_coordinate($_GET["lat"] ?? null, -90.0, 90.0);

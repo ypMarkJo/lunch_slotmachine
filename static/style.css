@@ -59,28 +59,39 @@ h1 {
 }
 
 .controls {
-  margin: 14px auto 8px;
-  width: min(620px, 92vw);
+  margin: 16px auto 10px;
+  width: min(340px, 90vw);
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
-  justify-content: center;
-  align-items: center;
+  align-items: stretch;
 }
 
 .control-btn {
   border: 1px solid #455a9b;
-  border-radius: 10px;
-  padding: 9px 14px;
-  font-size: 0.9rem;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #eff3ff;
   background: #25355f;
   cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.control-btn:active {
+  transform: scale(0.98);
 }
 
 .control-btn.secondary {
   background: #22334c;
+  border-color: #3b4e7a;
 }
 
 .control-btn:disabled {
@@ -92,23 +103,29 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  background: rgba(23, 31, 58, 0.7);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid #2d3b6e;
 }
 
 .radius-label {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .radius-label span {
   color: var(--accent);
   font-weight: 700;
+  font-size: 1.05rem;
 }
 
 .radius-slider {
   accent-color: var(--accent);
   cursor: pointer;
-  width: 140px;
+  width: 100%;
+  height: 6px;
 }
 
 .location-status {

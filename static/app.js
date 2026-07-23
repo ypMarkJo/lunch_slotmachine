@@ -20,11 +20,11 @@ let spinning = false;
 let restaurants = [];
 let loading = false;
 let userCoords = null;
-let radiusKm = parseRadiusValue(radiusRange?.value || "2.0");
+let radiusKm = parseRadiusValue(radiusRange?.value || "0.5");
 
 function parseRadiusValue(value) {
   const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return 2.0;
+  if (!Number.isFinite(parsed)) return 0.5;
   return Math.min(5.0, Math.max(0.1, Math.round(parsed * 10) / 10));
 }
 
@@ -63,7 +63,7 @@ function setNotice(message) {
 
 function updateLocationUi() {
   if (locationBtn) {
-    locationBtn.textContent = userCoords ? "기본 위치로 되돌리기" : "현재 위치 사용";
+    locationBtn.textContent = userCoords ? "📍 기본 위치로 되돌리기" : "📍 현재 위치 사용";
   }
   if (locationStatus) {
     const formattedRadius = formatRadiusText(radiusKm);
