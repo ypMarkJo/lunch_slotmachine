@@ -16,11 +16,11 @@ let spinning = false;
 let restaurants = [];
 let loading = false;
 let userCoords = null;
-let radiusKm = parseRadiusValue(radiusRange?.value || "0.5");
+let radiusKm = parseRadiusValue(radiusRange?.value || "0.1");
 
 function parseRadiusValue(value) {
   const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return 0.5;
+  if (!Number.isFinite(parsed)) return 0.1;
   return Math.min(5.0, Math.max(0.1, Math.round(parsed * 10) / 10));
 }
 

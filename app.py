@@ -98,7 +98,7 @@ def build_restaurant_payload(
 
 @app.get("/")
 def index():
-    payload = build_restaurant_payload(radius_km=0.5)
+    payload = build_restaurant_payload(radius_km=0.1)
     return render_template(
         "index.html",
         restaurants=payload["restaurants"],
@@ -109,7 +109,7 @@ def index():
 
 @app.get("/api/restaurants")
 def api_restaurants():
-    radius_km = parse_radius_km(request.args.get("radius_km"), default=0.5)
+    radius_km = parse_radius_km(request.args.get("radius_km"), default=0.1)
     latitude = parse_coordinate(request.args.get("lat"), minimum=-90.0, maximum=90.0)
     longitude = parse_coordinate(request.args.get("lng"), minimum=-180.0, maximum=180.0)
     payload = build_restaurant_payload(radius_km=radius_km, latitude=latitude, longitude=longitude)
