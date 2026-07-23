@@ -397,6 +397,30 @@ body {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
+.app-footer {
+  margin-top: 32px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.visitor-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(17, 25, 54, 0.7);
+  border: 1px solid #2d3b6e;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.visitor-count {
+  color: var(--accent);
+  font-weight: 800;
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: 0.95rem;
+}
+
 .hidden {
   display: none;
 }

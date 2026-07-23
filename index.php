@@ -9,6 +9,15 @@ $appJsVer = file_exists($appJsFile) ? filemtime($appJsFile) : time();
 $stylePath = $basePath . "/static/style.css?v=" . $styleVer;
 $appJsPath = $basePath . "/static/app.js?v=" . $appJsVer;
 $apiPath = $basePath . "/api/restaurants.php";
+
+// 누적 방문자 수 파일 카운터
+$counterFile = __DIR__ . "/counter.txt";
+$visitCount = 1;
+if (file_exists($counterFile)) {
+    $visitCount = (int)file_get_contents($counterFile) + 1;
+}
+@file_put_contents($counterFile, (string)$visitCount, LOCK_EX);
+$formattedVisits = number_format($visitCount);
 ?>
 <!doctype html>
 <html lang="ko">
@@ -89,6 +98,12 @@ $apiPath = $basePath . "/api/restaurants.php";
           <a id="mapLink" class="map-link" href="#" target="_blank" rel="noopener noreferrer">가게 지도 보기 🗺️</a>
         </section>
       </div>
+
+      <footer class="app-footer">
+        <div class="visitor-badge">
+          👀 누적 방문자 <span class="visitor-count"><?= $formattedVisits ?></span>번째 점심 추천 중!
+        </div>
+      </footer>
     </main>
 
     <script>
