@@ -226,14 +226,17 @@ async function loadRestaurants() {
   updateLocationUi();
 }
 
-function requestCurrentLocation() {
+function requestCurrentLocation(autoLoadOnFail = false) {
   if (!navigator.geolocation) {
     setNotice("브라우저가 위치 정보를 지원하지 않아 기본 위치로 조회합니다.");
+    if (autoLoadOnFail) {
+      loadRestaurants();
+    }
     return;
   }
 
   setLoading(true);
-  setNotice("현재 위치를 가져오는 중입니다...");
+  setNotice("현재 위치를 확인하는 중입니다...");
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -245,6 +248,7 @@ function requestCurrentLocation() {
       loadRestaurants();
     },
     (error) => {
+      userCoords = null;
       setLoading(false);
       updateLocationUi();
       switch (error.code) {
@@ -258,10 +262,13 @@ function requestCurrentLocation() {
           setNotice("현재 위치를 확인하지 못해 기본 위치로 조회합니다.");
           break;
       }
+      if (autoLoadOnFail) {
+        loadRestaurants();
+      }
     },
     {
       enableHighAccuracy: true,
-      timeout: 10000,
+      timeout: 7000,
       maximumAge: 60000,
     }
   );
@@ -306,4 +313,4 @@ if (locationBtn) {
 
 updateRadiusDisplay();
 updateLocationUi();
-loadRestaurants();
+requestCurrentLocation(true);
