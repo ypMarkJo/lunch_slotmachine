@@ -336,15 +336,45 @@ body {
 }
 
 .result-modal h2 {
-  margin: 0 0 10px;
-  font-size: 1.35rem;
+  margin: 0 0 6px;
+  font-size: 1.5rem;
   color: var(--accent);
+  font-weight: 800;
 }
 
-.result-modal p {
-  margin: 0 0 16px;
-  color: var(--muted);
-  font-size: 0.95rem;
+.result-info {
+  margin: 0 0 14px;
+  color: #c4d6ff;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.time-badge {
+  margin: 12px 0 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(255, 136, 0, 0.1));
+  border: 1px solid rgba(255, 204, 0, 0.4);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 16px rgba(255, 204, 0, 0.15);
+}
+
+.time-label {
+  font-size: 0.78rem;
+  color: #ffe680;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.time-value {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: 'Do Hyeon', 'Outfit', sans-serif;
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
 }
 
 .ad-area {

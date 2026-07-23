@@ -61,7 +61,7 @@ $apiPath = $basePath . "/api/restaurants.php";
         <section id="resultCard" class="result-modal">
           <button id="closeModalBtn" class="close-modal-btn" type="button" aria-label="닫기">✕</button>
           <h2 id="resultName"></h2>
-          <p id="resultMeta"></p>
+          <p id="resultMeta" class="result-info"></p>
           <div class="pace-control modal-pace">
             <label class="pace-label" for="paceSelect">1km 페이스 선택 🏃‍♂️</label>
             <select id="paceSelect" class="pace-select">
@@ -74,6 +74,10 @@ $apiPath = $basePath . "/api/restaurants.php";
               <option value="240">400 페이스 (4분/km, 전력질주 🔥)</option>
               <option value="180">300 페이스 (3분/km, 국가대표 🏆)</option>
             </select>
+          </div>
+          <div id="resultTimeBadge" class="time-badge">
+            <span class="time-label">예상 소요시간</span>
+            <span id="timeValue" class="time-value"></span>
           </div>
           <div id="adArea" class="ad-area">
             <ins class="kakao_ad_area" style="display:none;"
