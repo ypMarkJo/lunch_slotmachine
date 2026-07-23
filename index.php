@@ -101,7 +101,7 @@ $formattedVisits = number_format($visitCount);
 
       <footer class="app-footer">
         <div class="visitor-badge">
-          👀 누적 방문자 <span class="visitor-count"><?= $formattedVisits ?></span>번째 점심 추천 중!
+          🎰 누군가의 점심을 <span class="visitor-count"><?= $formattedVisits ?></span>번째 추천 중!
         </div>
       </footer>
     </main>
