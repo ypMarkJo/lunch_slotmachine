@@ -8,6 +8,7 @@ const radiusRange = document.getElementById("radiusRange");
 const radiusValue = document.getElementById("radiusValue");
 const reloadBtn = document.getElementById("reloadBtn");
 const categorySelect = document.getElementById("categorySelect");
+const paceSelect = document.getElementById("paceSelect");
 const modalOverlay = document.getElementById("modalOverlay");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
@@ -177,8 +178,16 @@ function spin() {
 
     const metaParts = [winner.category];
     if (winner.distance_m !== undefined && winner.distance_m !== null) {
-      const walkMins = Math.max(1, Math.round(winner.distance_m / 67));
-      metaParts.push(`🚶‍♂️ 도보 약 ${walkMins}분 (${winner.distance_m}m)`);
+      const paceValue = Number.parseInt(paceSelect?.value || "1200", 10) || 1200;
+      const totalSeconds = (winner.distance_m / 1000) * paceValue;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = Math.round(totalSeconds % 60);
+      let timeText = "";
+      if (mins > 0) {
+        timeText += `${mins}분 `;
+      }
+      timeText += `${secs}초`;
+      metaParts.push(`🏃‍♂️ 약 ${timeText} (${winner.distance_m}m)`);
     }
     if (winner.area) {
       metaParts.push(winner.area);
