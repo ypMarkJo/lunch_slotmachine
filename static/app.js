@@ -4,7 +4,6 @@ const resultCard = document.getElementById("resultCard");
 const resultName = document.getElementById("resultName");
 const resultMeta = document.getElementById("resultMeta");
 const mapLink = document.getElementById("mapLink");
-const sourceText = document.getElementById("sourceText");
 const noticeText = document.getElementById("noticeText");
 const locationBtn = document.getElementById("locationBtn");
 const radiusRange = document.getElementById("radiusRange");
@@ -44,9 +43,6 @@ function updateRadiusDisplay() {
 function applyRestaurants(data) {
   restaurants = Array.isArray(data.restaurants) ? data.restaurants : [];
   recommendationPool = [];
-  if (sourceText) {
-    sourceText.textContent = `데이터 소스: ${data.source || "알 수 없음"}`;
-  }
   if (noticeText) {
     noticeText.textContent = data.notice || "";
   }
@@ -221,9 +217,6 @@ async function loadRestaurants() {
       });
     } else {
       restaurants = [];
-      if (sourceText) {
-        sourceText.textContent = "데이터 소스: 로드 실패";
-      }
       setNotice(`식당 데이터를 불러오지 못했습니다. (${error.message})`);
     }
   }
