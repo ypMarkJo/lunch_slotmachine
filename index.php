@@ -89,13 +89,7 @@ $formattedVisits = number_format($visitCount);
             <span class="time-label">예상 소요시간</span>
             <span id="timeValue" class="time-value"></span>
           </div>
-          <div id="adArea" class="ad-area">
-            <ins class="kakao_ad_area" style="display:none;"
-                 data-ad-unit="DAN-ZDwpKOGHrs5WVYZK"
-                 data-ad-width="320"
-                 data-ad-height="50"></ins>
-            <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
-          </div>
+          <div id="adArea" class="ad-area"></div>
           <a id="mapLink" class="map-link" href="#" target="_blank" rel="noopener noreferrer">가게 지도 보기 🗺️</a>
         </section>
       </div>

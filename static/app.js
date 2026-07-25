@@ -136,6 +136,28 @@ function getMapUrl(restaurant) {
   return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
 }
 
+function loadKakaoAd() {
+  const adArea = document.getElementById("adArea");
+  if (!adArea) return;
+
+  adArea.innerHTML = "";
+
+  const ins = document.createElement("ins");
+  ins.className = "kakao_ad_area";
+  ins.style.display = "none";
+  ins.setAttribute("data-ad-unit", "DAN-ZDwpKOGHrs5WVYZK");
+  ins.setAttribute("data-ad-width", "320");
+  ins.setAttribute("data-ad-height", "50");
+
+  const script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = "//t1.kakaocdn.net/kas/static/ba.min.js";
+  script.async = true;
+
+  adArea.appendChild(ins);
+  adArea.appendChild(script);
+}
+
 function hideModal() {
   if (modalOverlay) {
     modalOverlay.classList.add("hidden");
@@ -145,6 +167,7 @@ function hideModal() {
 function showModal() {
   if (modalOverlay) {
     modalOverlay.classList.remove("hidden");
+    loadKakaoAd();
   }
 }
 
