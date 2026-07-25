@@ -469,3 +469,68 @@ if (cheerForm) {
 updateRadiusDisplay();
 updateLocationUi();
 requestCurrentLocation(true);
+
+// --- PWA (Service Worker & Installation) ---
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
+let deferredPrompt = null;
+const pwaInstallBtn = document.getElementById("pwaInstallBtn");
+const iosInstallModalOverlay = document.getElementById("iosInstallModalOverlay");
+const closeIosInstallModalBtn = document.getElementById("closeIosInstallModalBtn");
+
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+if (!isStandalone) {
+  if (pwaInstallBtn) {
+    pwaInstallBtn.classList.remove("hidden");
+  }
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (pwaInstallBtn) {
+    pwaInstallBtn.classList.remove("hidden");
+  }
+});
+
+if (pwaInstallBtn) {
+  pwaInstallBtn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        pwaInstallBtn.classList.add("hidden");
+      }
+      deferredPrompt = null;
+    } else if (isIos) {
+      if (iosInstallModalOverlay) {
+        iosInstallModalOverlay.classList.remove("hidden");
+      }
+    } else {
+      alert("브라우저 메뉴(⋮)에서 [홈 화면에 추가] 또는 [앱 설치]를 선택해 주세요!");
+    }
+  });
+}
+
+if (closeIosInstallModalBtn) {
+  closeIosInstallModalBtn.addEventListener("click", () => {
+    if (iosInstallModalOverlay) {
+      iosInstallModalOverlay.classList.add("hidden");
+    }
+  });
+}
+
+if (iosInstallModalOverlay) {
+  iosInstallModalOverlay.addEventListener("click", (e) => {
+    if (e.target === iosInstallModalOverlay) {
+      iosInstallModalOverlay.classList.add("hidden");
+    }
+  });
+}
+

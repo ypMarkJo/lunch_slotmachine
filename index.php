@@ -26,6 +26,9 @@ $formattedVisits = number_format($visitCount);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>점심 빠칭코 추천</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="static/icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Noto+Sans+KR:wght@700;800;900&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet" />
@@ -36,6 +39,7 @@ $formattedVisits = number_format($visitCount);
       <header class="app-header">
         <div class="brand-badge">🎰 LUNCH SLOT</div>
         <h1 class="app-title">점심 뭐묵칭코</h1>
+        <button id="pwaInstallBtn" class="pwa-install-btn hidden" type="button">📲 앱으로 설치하기</button>
       </header>
       <p class="guide-tip">💡 <strong>사용 방법:</strong> [거리 슬라이더 조절] → [주변 식당 불러오기] → [추천 시작(빠칭코)]</p>
       <section class="controls">
@@ -105,6 +109,25 @@ $formattedVisits = number_format($visitCount);
         </div>
       </footer>
     </main>
+
+    <!-- iOS 설치 안내 모달 -->
+    <div id="iosInstallModalOverlay" class="modal-overlay hidden">
+      <section class="result-modal cheer-modal pwa-guide-modal">
+        <button id="closeIosInstallModalBtn" class="close-modal-btn" type="button" aria-label="닫기">✕</button>
+        <h2 class="cheer-modal-title">📲 바탕화면에 앱으로 추가하기</h2>
+        <p class="cheer-modal-sub">Safari 브라우저에서 아래 2단계로 홈 화면에 앱 아이콘을 추가할 수 있습니다!</p>
+        <div class="pwa-guide-steps">
+          <div class="pwa-step-item">
+            <span class="step-num">1</span>
+            <span>하단 중앙의 <strong>[공유 버튼 ⎋]</strong>을 누르세요.</span>
+          </div>
+          <div class="pwa-step-item">
+            <span class="step-num">2</span>
+            <span>메뉴에서 <strong>[홈 화면에 추가 (+)]</strong>를 선택하세요!</span>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- 개발자 응원 모달 -->
     <div id="cheerModalOverlay" class="modal-overlay hidden">

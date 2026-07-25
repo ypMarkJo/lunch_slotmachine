@@ -1,0 +1,21 @@
+{
+  "name": "점심 뭐묵칭코",
+  "short_name": "점심빠칭코",
+  "description": "오늘 점심 뭐 먹지? 슬롯머신으로 빠르게 추천받으세요!",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
