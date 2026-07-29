@@ -27,7 +27,7 @@ body {
 }
 
 .app-header {
-  margin-top: 22px;
+  margin-top: 10px;
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
@@ -387,8 +387,8 @@ body {
 }
 
 .ad-area {
-  margin: 14px auto;
-  padding: 6px 0;
+  margin: 16px auto 6px;
+  padding: 4px 0;
   border-radius: 12px;
   min-height: 50px;
   display: flex;

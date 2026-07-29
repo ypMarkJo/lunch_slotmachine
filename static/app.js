@@ -167,7 +167,6 @@ function hideModal() {
 function showModal() {
   if (modalOverlay) {
     modalOverlay.classList.remove("hidden");
-    loadKakaoAd();
   }
 }
 
@@ -468,6 +467,7 @@ if (cheerForm) {
 
 updateRadiusDisplay();
 updateLocationUi();
+loadKakaoAd();
 requestCurrentLocation(true);
 
 // --- PWA (Service Worker & Installation) ---
